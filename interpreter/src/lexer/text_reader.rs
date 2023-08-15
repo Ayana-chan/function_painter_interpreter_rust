@@ -9,9 +9,9 @@ pub struct TextReader {
 }
 
 impl TextReader {
-    pub fn new(aim_file_reader: BufReader<File>) -> TextReader {
+    pub fn new(aim_file: File) -> TextReader {
         let ret = TextReader {
-            aim_file_reader,
+            aim_file_reader: BufReader::new(aim_file),
             line_buffer: vec![],
             curr_handle_index: 0,
         };
@@ -55,9 +55,9 @@ mod tests {
     #[test]
     fn test_continuous_read() {
         let file = File::open("example.txt").unwrap();
-        let reader = BufReader::new(file);
 
-        let mut tr = TextReader::new(reader);
+        let mut tr = TextReader::new(file);
+
         tr.eat_char();
         loop {
             let ch = tr.get_char();
