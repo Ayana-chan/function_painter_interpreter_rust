@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{BufReader, BufRead};
+// use std::str::Chars;
 
 pub struct TextReader {
     aim_file_reader: BufReader<File>,
@@ -46,6 +47,50 @@ impl TextReader {
         };
     }
 }
+
+//尝试版本
+// struct TextReader1<'a> {
+//     curr_char: Option<char>,
+//     aim_file_reader: BufReader<File>,
+//     line_itr: Option<Chars<'a>>,
+//     line: String,
+// }
+//
+// impl<'a> TextReader1<'a> {
+//     pub fn new(aim_file: File) -> TextReader1<'a> {
+//         let ret = TextReader1 {
+//             curr_char: None,
+//             aim_file_reader: BufReader::new(aim_file),
+//             line_itr: None,
+//             line: String::new(),
+//         };
+//         ret
+//     }
+//
+//     /// 获取当前的char
+//     /// EOF时返回None
+//     pub fn get_char(&mut self) -> Option<char> {
+//         self.curr_char
+//     }
+//
+//     /// 读取下一个char，覆盖当前的char
+//     /// 读取是按行读的，读完缓存的一行后再从文件读下一行
+//     pub fn eat_char(&'a mut self) {
+//         if let Some(itr) = &mut self.line_itr {
+//             self.curr_char = itr.next()
+//         }
+//         //读完了就再读一行（一直是None就是EOF了）
+//         if self.curr_char == None {
+//             self.read_line();
+//         }
+//     }
+//
+//     /// 从目标文件中读取一行存入缓存
+//     fn read_line(&'a mut self) {
+//         self.aim_file_reader.read_line(&mut self.line).unwrap();
+//         self.line_itr = Some(self.line.chars());
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
