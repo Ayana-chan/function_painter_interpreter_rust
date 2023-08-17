@@ -10,7 +10,7 @@ pub struct TextReader {
 }
 
 impl TextReader {
-    pub fn new(aim_file: File) -> TextReader {
+    pub fn new(aim_file: File) -> Self {
         let ret = TextReader {
             aim_file_reader: BufReader::new(aim_file),
             line_buffer: vec![],
@@ -21,8 +21,11 @@ impl TextReader {
 
     /// 获取当前的char
     /// EOF时返回None
-    pub fn get_char(&self) -> Option<&char> {
-        self.line_buffer.get(self.curr_handle_index)
+    pub fn get_char(&self) -> Option<char> {
+        return match self.line_buffer.get(self.curr_handle_index) {
+            Some(ch) => Some(*ch),
+            None => None
+        };
     }
 
     /// 读取下一个char，覆盖当前的char
@@ -57,7 +60,7 @@ impl TextReader {
 // }
 //
 // impl<'a> TextReader1<'a> {
-//     pub fn new(aim_file: File) -> TextReader1<'a> {
+//     pub fn new(aim_file: File) -> Self {
 //         let ret = TextReader1 {
 //             curr_char: None,
 //             aim_file_reader: BufReader::new(aim_file),
