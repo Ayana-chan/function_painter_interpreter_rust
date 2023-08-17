@@ -32,6 +32,16 @@ impl Lexer {
         return Token::new(TokenTypeEnum::ErrToken, "123abc", 0.0);
     }
 
+    ///获取curr_char
+    fn get_curr_char(&self) -> &Option<char> {
+        &self.curr_char
+    }
+
+    ///读取新的char并覆盖当前curr_char
+    fn read_new_char(&mut self) {
+        self.curr_char = self.text_reader.eat_char();
+    }
+
     ///在符号表中匹配token
     fn match_token(&self, lexeme: &str) -> Token {
         return match self.token_match_map.get(lexeme) {
