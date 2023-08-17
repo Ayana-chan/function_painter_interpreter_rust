@@ -36,7 +36,7 @@ impl TextReader {
     /// EOF时返回None
     fn get_char(&self) -> Option<char> {
         return match self.line_buffer.get(self.curr_handle_index) {
-            Some(ch) => Some(*ch), //copy以防止数据被删除
+            Some(ch) => Some(ch.to_uppercase().next().unwrap()), //copy以防止数据被删除
             None => None
         };
     }

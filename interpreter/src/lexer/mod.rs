@@ -63,7 +63,7 @@ impl Lexer {
         }
     }
 
-    //1.数字开头。必须是数字字面值（视为double）。吃掉小数点、数字、字母，最后一定要符合double格式
+    ///数字开头。必须是数字字面值（视为double）。吃掉小数点、数字、字母，最后一定要符合double格式
     fn collect_digit_token(&mut self) -> Token {
         let mut lexeme_char_vec: Vec<char> = Vec::new();
         loop {
@@ -79,18 +79,31 @@ impl Lexer {
 
         let lexeme: String = lexeme_char_vec.into_iter().collect();
 
-        return match lexeme.parse::<f64>() {
+        match lexeme.parse::<f64>() {
             Ok(value) => Token::new(TokenTypeEnum::ConstId, &lexeme, value),
             _ => Token::new(TokenTypeEnum::ErrToken, &lexeme, 0.0)
-        };
+        }
     }
 
-    //字母开头。保留字、函数名、参数、常数。吃掉字母、数字，最后去Map进行匹配
+    ///字母开头。保留字、函数名、参数、常数。吃掉字母、数字，最后去Map进行匹配
     fn collect_word_token(&mut self) -> Token {
-        return Token::new(TokenTypeEnum::ErrToken, "", 0.0);
+        let mut lexeme_char_vec: Vec<char> = Vec::new();
+        loop {
+            if let Some(ch) = self.get_curr_char() {
+                if ch.is_ascii_digit() || ch.is_ascii_alphabetic() {
+                    lexeme_char_vec.push(ch.clone());
+                    self.read_new_char();
+                    continue;
+                }
+            }
+            break;
+        }
+        let lexeme: String = lexeme_char_vec.into_iter().collect();
+
+        self.match_token(&lexeme)
     }
 
-    //运算符、分隔符。只有单符号和双符号
+    ///运算符、分隔符。只有单符号和双符号
     fn collect_special_token(&mut self) -> Token {
         return Token::new(TokenTypeEnum::ErrToken, "", 0.0);
     }
