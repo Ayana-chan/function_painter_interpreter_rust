@@ -14,12 +14,10 @@ pub struct Lexer {
 
 impl Lexer {
     pub fn new(file: File) -> Self {
-        let mut res = Lexer {
+        Lexer {
             text_reader: text_reader::TextReader::new(file),
             token_match_map: TokenTypeEnum::generate_token_match_map(),
-        };
-        res.text_reader.eat_char();
-        res
+        }
     }
 
     pub fn fetch_token(&mut self) -> Token {

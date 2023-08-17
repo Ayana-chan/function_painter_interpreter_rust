@@ -11,11 +11,13 @@ pub struct TextReader {
 
 impl TextReader {
     pub fn new(aim_file: File) -> Self {
-        let ret = TextReader {
+        let mut ret = TextReader {
             aim_file_reader: BufReader::new(aim_file),
             line_buffer: vec![],
             curr_handle_index: 0,
         };
+        //刚开始先吃一个以达成一致性
+        ret.eat_char();
         ret
     }
 
