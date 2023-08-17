@@ -11,34 +11,34 @@ pub struct TextReader {
 
 impl TextReader {
     pub fn new(aim_file: File) -> Self {
-        let mut ret = TextReader {
+        TextReader {
             aim_file_reader: BufReader::new(aim_file),
             line_buffer: vec![],
             curr_handle_index: 0,
-        };
-        //刚开始先吃一个以达成一致性
-        ret.eat_char();
-        ret
-    }
-
-    /// 获取当前的char
-    /// EOF时返回None
-    pub fn get_char(&self) -> Option<char> {
-        return match self.line_buffer.get(self.curr_handle_index) {
-            Some(ch) => Some(*ch),
-            None => None
-        };
+        }
     }
 
     /// 读取下一个char，覆盖当前的char
     /// 读取是按行读的，读完缓存的一行后再从文件读下一行
-    pub fn eat_char(&mut self) {
+    pub fn eat_char(&mut self) -> Option<char> {
         self.curr_handle_index += 1;
-        //读完了就再读一行（一直是None就是EOF了）
+
+        //读完了缓存，就再读一行（一直返回None就意味着EOF）
         if self.get_char() == None {
             let _ = self.read_line();
             self.curr_handle_index = 0;
         }
+
+        self.get_char()
+    }
+
+    /// 获取当前的char
+    /// EOF时返回None
+    fn get_char(&self) -> Option<char> {
+        return match self.line_buffer.get(self.curr_handle_index) {
+            Some(ch) => Some(*ch), //copy以防止数据被删除
+            None => None
+        };
     }
 
     /// 从目标文件中读取一行存入缓存
@@ -115,7 +115,7 @@ mod tests {
                 Some(c) => print!("{}", c),
                 None => return
             }
-            tr.eat_char()
+            tr.eat_char();
         }
     }
 
