@@ -104,7 +104,7 @@ mod tests {
 
     #[test]
     fn test_continuous_read() {
-        let file = File::open("example.txt").unwrap();
+        let file = File::open("lex_test.txt").unwrap();
 
         let mut tr = TextReader::new(file);
 
@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn test_read_file() {
         // 打开文件并创建一个 BufReader
-        let file = File::open("example.txt").unwrap();
+        let file = File::open("lex_test.txt").unwrap();
         let reader = BufReader::new(file);
 
         // 逐个字符地读取文件

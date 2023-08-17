@@ -105,7 +105,43 @@ impl Lexer {
 
     ///运算符、分隔符。只有单符号和双符号
     fn collect_special_token(&mut self) -> Token {
-        return Token::new(TokenTypeEnum::ErrToken, "", 0.0);
+        let aim_char = self.get_curr_char().unwrap();
+        self.read_new_char();
+
+        //要先检测所有双符号
+        //指数
+        if aim_char == '*' {
+            //要看下一个符号是什么
+            if let Some(ch)=self.get_curr_char(){
+                if *ch == '*'{
+                    return self.match_token("**");
+                }
+            }
+        }
+
+        //行注释
+        if aim_char == '/'{
+            //要看下一个符号是什么
+            if let Some(ch)=self.get_curr_char(){
+                if *ch == '/'{
+                    //读到行末或EOF
+                    loop {
+                        self.read_new_char();
+                        if let Some(ch) = self.get_curr_char() {
+                            if *ch == '\n' || *ch == '\r' { //换行
+                                break
+                            }
+                        }else{
+                            break; //EOF
+                        }
+                    }
+                    //查找下一个token以返回，保证上层一直接收到有效的token
+                    return self.fetch_token();
+                }
+            }
+        }
+
+        return self.match_token(&String::from(aim_char));
     }
 
     ///获取curr_char
@@ -134,7 +170,7 @@ mod tests {
 
     #[test]
     fn test_independence() {
-        let file = File::open("example.txt").unwrap();
+        let file = File::open("lex_test.txt").unwrap();
         let lexer = Lexer::new(file);
 
         let text = "+";
@@ -153,7 +189,7 @@ mod tests {
 
     #[test]
     fn test_read_token_until_eof() {
-        let file = File::open("example.txt").unwrap();
+        let file = File::open("lex_test.txt").unwrap();
         let mut lexer = Lexer::new(file);
 
         // let token = lexer.fetch_token();

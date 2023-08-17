@@ -11,9 +11,8 @@ pub struct Token {
 
 #[derive(Debug,Clone,PartialEq)]
 pub enum TokenTypeEnum {
-    //数字
     Id,
-    //注释
+    //注释（在词法分析时直接被丢掉了）
     Comment,
 
     //保留字
