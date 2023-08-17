@@ -9,7 +9,7 @@ pub struct Token {
     value: f64, //数值
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum TokenTypeEnum {
     //数字
     Id,
@@ -83,9 +83,7 @@ impl Token {
     pub fn set_value(&mut self, value: f64) {
         self.value = value;
     }
-}
 
-impl TokenTypeEnum {
     pub fn generate_token_match_map() -> HashMap<String, Token> {
         let mut string_trans_token_map = HashMap::new();
         //保留字
@@ -124,10 +122,13 @@ impl TokenTypeEnum {
         //注释
         string_trans_token_map.insert(String::from("//"), Token::new(TokenTypeEnum::Comment, "//", 0.0));//
         string_trans_token_map.insert(String::from("--"), Token::new(TokenTypeEnum::Comment, "--", 0.0));//
-        //结束
-        // string_trans_token_map.insert(""+TxtReader.EOF,Token::new(TokenTypeEnum::NonToken, "EOF(#)", 0.0));
 
         string_trans_token_map
+    }
+
+    ///获取EOF token
+    pub fn generate_eof_token() -> Token {
+        Token::new(TokenTypeEnum::NonToken, "EOF(#)", 0.0)
     }
 }
 

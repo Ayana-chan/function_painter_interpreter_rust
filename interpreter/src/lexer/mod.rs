@@ -23,13 +23,76 @@ impl Lexer {
         Lexer {
             text_reader: aim_text_reader,
             curr_char,
-            token_match_map: TokenTypeEnum::generate_token_match_map(),
+            token_match_map: Token::generate_token_match_map(),
         }
     }
 
     ///获取下一个token
     pub fn fetch_token(&mut self) -> Token {
-        return Token::new(TokenTypeEnum::ErrToken, "123abc", 0.0);
+        //略过空白项
+        self.skip_whitespace();
+
+        if let Some(ch) = self.get_curr_char() {
+            //根据开头字符，分为三种情况进行拼接
+            if ch.is_ascii_digit() {
+                //1.数字开头。必须是double。吃掉小数点、数字、字母，最后一定要符合double格式
+                return self.collect_digit_token();
+            } else if ch.is_ascii_alphabetic() {
+                //2.字母开头。保留字、函数名、参数、常数。吃掉字母、数字，最后去Map进行匹配
+                return self.collect_word_token();
+            } else {
+                //3.运算符、分隔符。只有单符号和双符号
+                return self.collect_special_token();
+            }
+        }
+
+        //None，表示EOF了
+        return Token::generate_eof_token();
+    }
+
+    ///略过空白项
+    fn skip_whitespace(&mut self) {
+        loop {
+            if let Some(ch) = self.get_curr_char() {
+                if ch.is_ascii_whitespace() {
+                    self.read_new_char();
+                    continue;
+                }
+            }
+            break;
+        }
+    }
+
+    //1.数字开头。必须是数字字面值（视为double）。吃掉小数点、数字、字母，最后一定要符合double格式
+    fn collect_digit_token(&mut self) -> Token {
+        let mut lexeme_char_vec: Vec<char> = Vec::new();
+        loop {
+            if let Some(ch) = self.get_curr_char() {
+                if *ch == '.' || ch.is_ascii_digit() || ch.is_ascii_alphabetic() {
+                    lexeme_char_vec.push(ch.clone());
+                    self.read_new_char();
+                    continue;
+                }
+            }
+            break;
+        }
+
+        let lexeme: String = lexeme_char_vec.into_iter().collect();
+
+        return match lexeme.parse::<f64>() {
+            Ok(value) => Token::new(TokenTypeEnum::ConstId, &lexeme, value),
+            _ => Token::new(TokenTypeEnum::ErrToken, &lexeme, 0.0)
+        };
+    }
+
+    //字母开头。保留字、函数名、参数、常数。吃掉字母、数字，最后去Map进行匹配
+    fn collect_word_token(&mut self) -> Token {
+        return Token::new(TokenTypeEnum::ErrToken, "", 0.0);
+    }
+
+    //运算符、分隔符。只有单符号和双符号
+    fn collect_special_token(&mut self) -> Token {
+        return Token::new(TokenTypeEnum::ErrToken, "", 0.0);
     }
 
     ///获取curr_char
@@ -69,10 +132,25 @@ mod tests {
         token1.set_lexeme("//");
         println!("change local token: {:?}", token1);
 
-        let mut token2 = lexer.match_token(text);
+        let token2 = lexer.match_token(text);
         println!("again get token: {:?}", token2);
 
         assert_eq!(text, token2.lexeme());
+    }
+
+    #[test]
+    fn test_read_token_enhance() {
+        let file = File::open("example.txt").unwrap();
+        let mut lexer = Lexer::new(file);
+
+        // let token = lexer.fetch_token();
+        loop {
+            let token = lexer.fetch_token();
+            println!("{:?}",token);
+            if *token.token_type()==TokenTypeEnum::NonToken || *token.token_type()==TokenTypeEnum::ErrToken{
+                break
+            }
+        }
     }
 }
 
