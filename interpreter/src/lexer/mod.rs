@@ -120,7 +120,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_read_token_basic() {
+    fn test_independence() {
         let file = File::open("example.txt").unwrap();
         let lexer = Lexer::new(file);
 
@@ -139,7 +139,7 @@ mod tests {
     }
 
     #[test]
-    fn test_read_token_enhance() {
+    fn test_read_token_until_eof() {
         let file = File::open("example.txt").unwrap();
         let mut lexer = Lexer::new(file);
 
@@ -147,7 +147,7 @@ mod tests {
         loop {
             let token = lexer.fetch_token();
             println!("{:?}",token);
-            if *token.token_type()==TokenTypeEnum::NonToken || *token.token_type()==TokenTypeEnum::ErrToken{
+            if *token.token_type()==TokenTypeEnum::NonToken{
                 break
             }
         }
