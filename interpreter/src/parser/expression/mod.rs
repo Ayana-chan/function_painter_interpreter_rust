@@ -10,7 +10,7 @@ pub trait ASTNode {
 //用于辅助print语法树的三个函数
 fn print_tree_prefix_tab(level: i32){
     print!("  |");
-    for i in 0..level {
+    for _ in 0..level {
         print!("          |");
     }
 }
@@ -75,14 +75,14 @@ impl ASTNode for BinaryNode {
 
 ///常数
 pub struct ConstNode {
-    token_type: lexer::TokenTypeEnum,
+    // token_type: lexer::TokenTypeEnum,
     value: f64,
 }
 
 impl ConstNode {
     pub fn new(token: lexer::Token) -> Self {
         ConstNode {
-            token_type: token.token_type(),
+            // token_type: token.token_type(),
             value: token.value(),
         }
     }
@@ -133,7 +133,7 @@ impl ASTNode for FuncNode {
         print_tree_prefix_begin(level);
         println!("$ {:?}",self.token_type);
         print_tree_prefix_tab(level);
-        println!("= {}",self.func_name);
+        println!(": {}",self.func_name);
 
             print_tree_prefix_tab(level);
             println!();
@@ -148,6 +148,7 @@ impl ASTNode for FuncNode {
 ///变量
 pub struct VariableNode {
     token_type: lexer::TokenTypeEnum,
+    variable_name: String,
     value_reference: Rc<RefCell<f64>>,
 }
 
@@ -155,6 +156,7 @@ impl VariableNode {
     pub fn new(token: lexer::Token, value_reference: &Rc<RefCell<f64>>) -> Self {
         VariableNode {
             token_type: token.token_type(),
+            variable_name: token.lexeme().parse().unwrap(),
             value_reference: value_reference.clone(),
         }
     }
@@ -167,16 +169,19 @@ impl ASTNode for VariableNode {
 
     fn print_tree(&self, level: i32) {
         print_tree_prefix_begin(level);
+        println!("$ {:?}",self.token_type);
+        print_tree_prefix_tab(level);
+        println!(": {}",self.variable_name);
+        print_tree_prefix_tab(level);
         println!("= {:?}",*self.value_reference.borrow());
 
-        // print_tree_prefix_end(level);
+        print_tree_prefix_end(level);
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::fs::File;
-    use crate::lexer::{Token, TokenBuilder, TokenTypeEnum};
+    use crate::lexer::{TokenBuilder, TokenTypeEnum};
 
     use super::*;
 
@@ -199,6 +204,8 @@ mod tests {
 
         let ans = binary_node.calculate();
         assert_eq!(ans, 17.8);
+
+        binary_node.print_tree(0);
     }
 
     #[test]
@@ -275,6 +282,8 @@ mod tests {
 
         ans = binary_node.calculate();
         assert_eq!(ans, 14.5);
+
+        binary_node.print_tree(0);
     }
 }
 

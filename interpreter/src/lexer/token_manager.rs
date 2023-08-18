@@ -27,8 +27,7 @@ pub struct TokenBuilder {
 //TODO 如果能自由定义变量名，就需要给字母带头的、不符合要求的token都换成Variable
 #[derive(Debug,Copy, Clone, PartialEq)]
 pub enum TokenTypeEnum {
-    Id,
-    //注释（在词法分析时直接被丢掉了）
+    //注释（在词法分析时直接被丢掉了，可以说完全没用）
     Comment,
 
     //保留字
@@ -194,7 +193,7 @@ impl TokenBuilder {
             token_type: self.token_type.unwrap(),
             lexeme: self.lexeme.unwrap(),
             value: 0.0,
-            func: Rc::new(|args| -> f64{ 0.0 }),
+            func: Rc::new(|_args| -> f64{ 0.0 }),
         };
 
         if let Some(value) = self.value {
