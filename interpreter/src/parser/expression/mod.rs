@@ -1,12 +1,35 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::lexer;
-//
-//TODO T类型的值使用引用
 
 pub trait ASTNode {
     fn calculate(&self) -> f64;
-    //TODO print方法
+    fn print_tree(&self,level: i32);
+}
+
+//用于辅助print语法树的三个函数
+fn print_tree_prefix_tab(level: i32){
+    print!("  |");
+    for i in 0..level {
+        print!("          |");
+    }
+}
+fn print_tree_prefix_begin(level: i32){
+    if level==0{
+        print!("->|");
+    }else{
+        print_tree_prefix_tab(level-1);
+        print!("--------->|");
+    }
+}
+fn print_tree_prefix_end(level: i32){
+    if level==0{
+        print!("  `");
+    }else{
+        print_tree_prefix_tab(level-1);
+        print!("          `");
+    }
+    println!();
 }
 
 ///二元运算
@@ -34,6 +57,20 @@ impl ASTNode for BinaryNode {
         let right_result = self.right.calculate();
         (self.func)(&[left_result, right_result])
     }
+
+    fn print_tree(&self, level: i32) {
+        print_tree_prefix_begin(level);
+        println!("$ {:?}",self.token_type);
+
+        print_tree_prefix_tab(level);
+        println!();
+        self.left.print_tree(level+1);
+        // print_tree_prefix_tab(level);
+        // println!();
+        self.right.print_tree(level+1);
+
+        print_tree_prefix_end(level);
+    }
 }
 
 ///常数
@@ -55,11 +92,19 @@ impl ASTNode for ConstNode {
     fn calculate(&self) -> f64 {
         self.value
     }
+
+    fn print_tree(&self, level: i32) {
+        print_tree_prefix_begin(level);
+        println!("$ {:?}",self.value);
+
+        // print_tree_prefix_end(level);
+    }
 }
 
 ///函数
 pub struct FuncNode {
     token_type: lexer::TokenTypeEnum,
+    func_name: String,
     func: Rc<dyn Fn(&[f64]) -> f64>,
     arg_nodes: Vec<Rc<dyn ASTNode>>,
 }
@@ -68,6 +113,7 @@ impl FuncNode {
     pub fn new(token: lexer::Token, arg_nodes: Vec<Rc<dyn ASTNode>>) -> Self {
         FuncNode {
             token_type: token.token_type(),
+            func_name: token.lexeme().parse().unwrap(),
             func: token.func().clone(),
             arg_nodes,
         }
@@ -81,6 +127,21 @@ impl ASTNode for FuncNode {
             args.push(node.calculate());
         }
         (self.func)(&args)
+    }
+
+    fn print_tree(&self, level: i32) {
+        print_tree_prefix_begin(level);
+        println!("$ {:?}",self.token_type);
+        print_tree_prefix_tab(level);
+        println!("= {}",self.func_name);
+
+            print_tree_prefix_tab(level);
+            println!();
+        for arg_node in &self.arg_nodes {
+            arg_node.print_tree(level+1)
+        }
+
+        print_tree_prefix_end(level);
     }
 }
 
@@ -102,6 +163,13 @@ impl VariableNode {
 impl ASTNode for VariableNode {
     fn calculate(&self) -> f64 {
         *self.value_reference.borrow()
+    }
+
+    fn print_tree(&self, level: i32) {
+        print_tree_prefix_begin(level);
+        println!("= {:?}",*self.value_reference.borrow());
+
+        // print_tree_prefix_end(level);
     }
 }
 
@@ -140,7 +208,7 @@ mod tests {
             let mut ans = 1.0;
             for arg in args {
                 ans *= arg;
-                println!("mutiall mid ans = {}", ans);
+                // println!("mutiall mid ans = {}", ans);
             }
             ans
         })).build();
@@ -176,6 +244,8 @@ mod tests {
         assert_eq!(ans, 125.0);
         ans = func_node.calculate();
         assert_eq!(ans, 125.0);
+
+        func_node.print_tree(0);
     }
 
     #[test]
