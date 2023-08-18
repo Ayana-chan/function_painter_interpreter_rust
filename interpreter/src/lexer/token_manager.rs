@@ -13,6 +13,7 @@ pub struct Token {
     func: Rc<dyn Fn(&[f64]) -> f64>,
 }
 
+///用于建造Token（建造者模式）
 pub struct TokenBuilder {
     //Token类型
     token_type: Option<TokenTypeEnum>,
@@ -23,8 +24,8 @@ pub struct TokenBuilder {
     //函数
     func: Option<Rc<dyn Fn(&[f64]) -> f64>>,
 }
-
-#[derive(Debug, Clone, PartialEq)]
+//TODO 如果能自由定义变量名，就需要给字母带头的、不符合要求的token都换成Variable
+#[derive(Debug,Copy, Clone, PartialEq)]
 pub enum TokenTypeEnum {
     Id,
     //注释（在词法分析时直接被丢掉了）
@@ -42,7 +43,7 @@ pub enum TokenTypeEnum {
     From,
 
     //参数
-    T,
+    Variable,
 
     //分隔符
     Semico,
@@ -78,8 +79,8 @@ impl std::fmt::Debug for Token {
 }
 
 impl Token {
-    pub fn token_type(&self) -> &TokenTypeEnum {
-        &self.token_type
+    pub fn token_type(&self) -> TokenTypeEnum {
+        self.token_type
     }
     pub fn lexeme(&self) -> &str {
         &self.lexeme
@@ -105,7 +106,7 @@ impl Token {
         self.func = func;
     }
 
-    pub fn generate_token_match_map() -> HashMap<String, Token> {
+    pub fn generate_token_match_map() -> HashMap<String, Token> { //TODO 复制func
         let mut string_trans_token_map = HashMap::new();
         //保留字
         string_trans_token_map.insert(String::from("ORIGIN"), TokenBuilder::new().token_type(TokenTypeEnum::Origin).lexeme("ORIGIN").build());
@@ -136,7 +137,7 @@ impl Token {
         string_trans_token_map.insert(String::from("EXP"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("EXP").build());//
         string_trans_token_map.insert(String::from("SQRT"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("SQRT").build());
         //参数
-        string_trans_token_map.insert(String::from("T"), TokenBuilder::new().token_type(TokenTypeEnum::T).lexeme("T").build());//"TAN"前缀
+        string_trans_token_map.insert(String::from("T"), TokenBuilder::new().token_type(TokenTypeEnum::Variable).lexeme("T").build());//"TAN"前缀
         //常数
         string_trans_token_map.insert(String::from("PI"), TokenBuilder::new().token_type(TokenTypeEnum::ConstId).lexeme("PI").value(std::f64::consts::PI).build());
         string_trans_token_map.insert(String::from("E"), TokenBuilder::new().token_type(TokenTypeEnum::ConstId).lexeme("E").value(std::f64::consts::E).build());//"EXP"前缀
@@ -158,7 +159,6 @@ impl Token {
     }
 }
 
-//建造者模式
 impl TokenBuilder {
     pub fn new() -> Self {
         TokenBuilder {
@@ -194,7 +194,7 @@ impl TokenBuilder {
             token_type: self.token_type.unwrap(),
             lexeme: self.lexeme.unwrap(),
             value: 0.0,
-            func: Rc::new(|x| -> f64{ 0.0 }),
+            func: Rc::new(|args| -> f64{ 0.0 }),
         };
 
         if let Some(value) = self.value {

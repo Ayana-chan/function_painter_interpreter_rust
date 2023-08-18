@@ -1,5 +1,5 @@
 mod lexer;
-mod parser; //TODO enum代表树，每个变体都是一种树类型，附带对应结构体数据；树本身可以用trait来代替
+mod parser;
 mod exception;
 
 pub fn add(left: usize, right: usize) -> usize {

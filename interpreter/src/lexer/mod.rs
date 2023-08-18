@@ -198,7 +198,7 @@ mod tests {
         loop {
             let token = lexer.fetch_token();
             println!("{:?}",token);
-            if *token.token_type()==TokenTypeEnum::NonToken{
+            if token.token_type()==TokenTypeEnum::NonToken{
                 break
             }
         }
