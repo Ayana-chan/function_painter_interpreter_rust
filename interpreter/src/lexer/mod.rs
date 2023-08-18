@@ -1,7 +1,7 @@
 use std::collections::hash_map::HashMap;
 use std::fs::File;
 
-use token_manager::*;
+pub use token_manager::*;
 
 mod text_reader;
 mod token_manager;
@@ -81,8 +81,8 @@ impl Lexer {
         let lexeme: String = lexeme_char_vec.into_iter().collect();
 
         match lexeme.parse::<f64>() {
-            Ok(value) => Token::new(TokenTypeEnum::ConstId, &lexeme, value),
-            _ => Token::new(TokenTypeEnum::ErrToken, &lexeme, 0.0)
+            Ok(value) => TokenBuilder::new().token_type(TokenTypeEnum::ConstId).lexeme(&lexeme).value(value).build(),
+            _ => TokenBuilder::new().token_type(TokenTypeEnum::ErrToken).lexeme(&lexeme).build()
         }
     }
 
@@ -159,7 +159,7 @@ impl Lexer {
     fn match_token(&self, lexeme: &str) -> Token {
         return match self.token_match_map.get(lexeme) {
             Some(token) => (*token).clone(),
-            None => Token::new(TokenTypeEnum::ErrToken, lexeme, 0.0)
+            None =>  TokenBuilder::new().token_type(TokenTypeEnum::ErrToken).lexeme(lexeme).build()
         };
     }
 }
