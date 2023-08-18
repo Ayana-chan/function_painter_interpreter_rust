@@ -148,14 +148,14 @@ impl Token {
         string_trans_token_map
     }
 
-    ///获取EOF token
+    ///生成EOF token
     pub fn generate_eof_token() -> Token {
         TokenBuilder::new().token_type(TokenTypeEnum::NonToken).lexeme("EOF(#)").build()
     }
 
-    ///获取Err token
+    ///生成Err token
     pub fn generate_err_token(lexeme: &str) -> Token {
-        TokenBuilder::new().token_type(TokenTypeEnum::NonToken).lexeme(lexeme).build()
+        TokenBuilder::new().token_type(TokenTypeEnum::ErrToken).lexeme(lexeme).build()
     }
 }
 

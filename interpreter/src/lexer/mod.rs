@@ -82,7 +82,7 @@ impl Lexer {
 
         match lexeme.parse::<f64>() {
             Ok(value) => TokenBuilder::new().token_type(TokenTypeEnum::ConstId).lexeme(&lexeme).value(value).build(),
-            _ => TokenBuilder::new().token_type(TokenTypeEnum::ErrToken).lexeme(&lexeme).build()
+            _ => Token::generate_err_token(&lexeme)
         }
     }
 
@@ -159,7 +159,7 @@ impl Lexer {
     fn match_token(&self, lexeme: &str) -> Token {
         return match self.token_match_map.get(lexeme) {
             Some(token) => (*token).clone(),
-            None =>  TokenBuilder::new().token_type(TokenTypeEnum::ErrToken).lexeme(lexeme).build()
+            None =>  Token::generate_err_token(&lexeme)
         };
     }
 }
