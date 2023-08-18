@@ -1,9 +1,10 @@
-mod text_reader;
-
-use std::fs::File;
 use std::collections::hash_map::HashMap;
+use std::fs::File;
 
-use super::token_manager::*;
+use token_manager::*;
+
+mod text_reader;
+mod token_manager;
 
 pub struct Lexer {
     //字符读取器
@@ -166,6 +167,7 @@ impl Lexer {
 #[cfg(test)]
 mod tests {
     use std::fs::File;
+
     use super::*;
 
     #[test]
