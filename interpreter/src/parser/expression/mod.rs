@@ -15,7 +15,29 @@ impl ExpressionParser {
         }
     }
 
+    //TODO 控制语法树的打印开关
+    ///分析表达式。加减
     fn parse_expression(&mut self) -> exception::Result<()> {
+        Ok(())
+    }
+
+    ///乘除
+    fn parse_term(&mut self) -> exception::Result<()> {
+        Ok(())
+    }
+
+    ///一元正负
+    fn parse_factor(&mut self) -> exception::Result<()> {
+        Ok(())
+    }
+
+    ///乘方
+    fn parse_component(&mut self) -> exception::Result<()> {
+        Ok(())
+    }
+
+    ///常量、参数、括号、函数
+    fn parse_atom(&mut self) -> exception::Result<()> {
         Ok(())
     }
 }
