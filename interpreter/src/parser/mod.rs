@@ -11,13 +11,16 @@ mod expression;
 
 pub struct ParserManager {
     parser_kernel: Rc<RefCell<ParserKernel>>,
+    //expression语法分析器
+    expression_parser: expression::ExpressionParser,
 }
 
 impl ParserManager {
     pub fn new(file: File) -> Self {
         let parser_kernel = Rc::new(RefCell::new(ParserKernel::new(file)));
         ParserManager {
-            parser_kernel,
+            expression_parser: expression::ExpressionParser::new(&parser_kernel),
+            parser_kernel, //一定要放在后面，否则会过早夺取所有权
         }
     }
 
