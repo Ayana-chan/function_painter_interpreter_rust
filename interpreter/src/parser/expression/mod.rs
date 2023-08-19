@@ -1,20 +1,20 @@
-use std::collections::HashMap;
-
-mod ast_tree;
-
-pub struct ExpressionManager{
-    symbol_table: HashMap<String,f64>, //符号表，符号名->值
-}
-
-impl ExpressionManager{
-    pub fn new()->Self{
-        ExpressionManager{
-            symbol_table: HashMap::new()
-        }
-    }
-
-    // pub fn match_expression
-}
+// use crate::parser::Parser;
+//
+// mod ast_tree;
+//
+// pub struct ExpressionManager<'a>{
+//     parser: &'a Parser
+// }
+//
+// impl<'a> ExpressionManager<'a>{
+//     pub fn new(parser: &'a Parser)->Self{
+//         ExpressionManager{
+//             parser
+//         }
+//     }
+//
+//     // pub fn match_expression
+// }
 
 
 
