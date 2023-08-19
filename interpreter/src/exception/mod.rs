@@ -34,7 +34,7 @@ impl ExceptionTrait for Exception {
 }
 
 ///编译时异常
-pub struct AnalysisException {
+struct AnalysisException {
     sub_exception: Box<dyn ExceptionTrait>,
 }
 
@@ -55,7 +55,7 @@ impl ExceptionTrait for AnalysisException {
 }
 
 ///运行时异常
-pub struct RuntimeException {
+struct RuntimeException {
     sub_exception: Box<dyn ExceptionTrait>,
 }
 
@@ -96,14 +96,14 @@ impl ExceptionTrait for UnknownTokenError {
 ///语法错误
 pub struct SyntaxError {
     token: Token,
-    expect_token_type: TokenTypeEnum,
+    expect_token_types: Vec<TokenTypeEnum>,
 }
 
 impl SyntaxError {
-    pub fn new(token: &Token, expect_token_type: TokenTypeEnum) -> Exception {
+    pub fn new(token: &Token, expect_token_type: &[TokenTypeEnum]) -> Exception {
         AnalysisException::generate(Box::new(Self {
             token: token.clone(),
-            expect_token_type,
+            expect_token_types: expect_token_type.to_vec(),
         }))
     }
 }
@@ -111,6 +111,8 @@ impl SyntaxError {
 impl ExceptionTrait for SyntaxError {
     fn print_exception(&self) {
         println!("Syntax Error: {:?}", self.token);
+        println!("Except: {:?}", self.expect_token_types);
+        println!("Found : {:?}", self.token.token_type());
     }
 }
 
