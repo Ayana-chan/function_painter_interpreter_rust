@@ -1,4 +1,4 @@
-use crate::lexer;
+use crate::lexer::*;
 
 pub type Result<T> = std::result::Result<T, Exception>;
 
@@ -27,7 +27,7 @@ impl BaseExceptionTrait for Exception {
 
 impl ExceptionTrait for Exception {
     fn print_exception(&self) {
-        println!();
+        println!();//TODO 错误定位
         self.sub_exception.print_exception();
         println!();
     }
@@ -76,11 +76,11 @@ impl ExceptionTrait for RuntimeException {
 
 ///无法识别的Token
 pub struct UnknownTokenError {
-    token: lexer::Token,
+    token: Token,
 }
 
 impl UnknownTokenError {
-    pub fn new(token: &lexer::Token) -> Exception {
+    pub fn new(token: &Token) -> Exception {
         AnalysisException::generate(Box::new(Self {
             token: token.clone()
         }))
@@ -89,7 +89,28 @@ impl UnknownTokenError {
 
 impl ExceptionTrait for UnknownTokenError {
     fn print_exception(&self) {
-        println!("ErrorToken: {:?}", self.token);
+        println!("Unknown Token: {:?}", self.token);
+    }
+}
+
+///语法错误
+pub struct SyntaxError {
+    token: Token,
+    expect_token_type: TokenTypeEnum,
+}
+
+impl SyntaxError {
+    pub fn new(token: &Token, expect_token_type: TokenTypeEnum) -> Exception {
+        AnalysisException::generate(Box::new(Self {
+            token: token.clone(),
+            expect_token_type,
+        }))
+    }
+}
+
+impl ExceptionTrait for SyntaxError {
+    fn print_exception(&self) {
+        println!("Syntax Error: {:?}", self.token);
     }
 }
 
@@ -99,8 +120,8 @@ mod tests {
 
     #[test]
     fn test_print_exception() {
-        UnknownTokenError::new(&lexer::TokenBuilder::new()
-            .token_type(lexer::TokenTypeEnum::ErrToken)
+        UnknownTokenError::new(&TokenBuilder::new()
+            .token_type(TokenTypeEnum::ErrToken)
             .lexeme("12uuu").build())
             .print_exception();
     }
