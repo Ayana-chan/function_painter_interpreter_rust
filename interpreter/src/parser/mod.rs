@@ -1,5 +1,7 @@
+use std::cell::{RefCell, RefMut};
 use std::collections::HashMap;
 use std::fs::File;
+use std::rc::Rc;
 
 use crate::lexer::*;
 use crate::exception;
@@ -7,19 +9,19 @@ use crate::exception::ExceptionTrait;
 
 mod expression;
 
-pub struct MainParser {
-    parser_kernel: ParserKernel,
+pub struct ParserManager {
+    parser_kernel: Rc<RefCell<ParserKernel>>,
 }
 
-impl MainParser {
+impl ParserManager {
     pub fn new(file: File) -> Self {
-        MainParser {
-            parser_kernel: ParserKernel::new(file),
+        let parser_kernel = Rc::new(RefCell::new(ParserKernel::new(file)));
+        ParserManager {
+            parser_kernel,
         }
     }
 
     pub fn parse(&mut self) {
-        //TODO 异常接收处理
         let parse_result = self.parse_program();
         if let Err(e) = parse_result {
             e.print_exception();
@@ -29,21 +31,21 @@ impl MainParser {
 
     ///解析语句
     fn parse_program(&mut self) -> exception::Result<()> {
-        while self.parser_kernel().get_curr_token_type() != TokenTypeEnum::NonToken {
+        while self.parser_kernel().borrow_mut().get_curr_token_type() != TokenTypeEnum::NonToken {
             //匹配一句
             self.parse_statement()?;
-            self.parser_kernel().match_and_eat_token(TokenTypeEnum::Semico)?;
+            self.parser_kernel().borrow_mut().match_and_eat_token(TokenTypeEnum::Semico)?;
         }
         Ok(())
     }
 
     fn parse_statement(&mut self) -> exception::Result<()> {
-        match self.parser_kernel().get_curr_token_type() {
+        match self.parser_kernel().borrow_mut().get_curr_token_type() {
             TokenTypeEnum::Origin => self.parse_origin_statement()?,
             TokenTypeEnum::Scale => self.parse_origin_statement()?,
             TokenTypeEnum::Rot => self.parse_origin_statement()?,
             TokenTypeEnum::For => self.parse_origin_statement()?,
-            _ => return self.parser_kernel().generate_syntax_error(&[
+            _ => return self.parser_kernel().borrow_mut().generate_syntax_error(&[
                 TokenTypeEnum::Origin, TokenTypeEnum::Scale, TokenTypeEnum::Rot, TokenTypeEnum::For
             ]),
         }
@@ -66,12 +68,12 @@ impl MainParser {
         Ok(())
     }
 
-    pub fn parser_kernel(&mut self) -> &mut ParserKernel {
-        &mut self.parser_kernel
+    pub fn parser_kernel(&self) -> Rc<RefCell<ParserKernel>> {
+        self.parser_kernel.clone()
     }
 }
 
-///对parser的进一步封装
+///对parser底层进行一次封装
 pub struct ParserKernel {
     curr_token: Token,
     lexer: Lexer,
@@ -119,10 +121,6 @@ impl ParserKernel {
         Err(exception::SyntaxError::new(&self.get_curr_token(), expected_token_type))
     }
 }
-
-
-
-
 
 
 
