@@ -1,4 +1,5 @@
 use std::collections::hash_map::HashMap;
+use std::intrinsics::sinf64;
 use std::rc::Rc;
 
 #[derive(Clone)]
@@ -24,8 +25,9 @@ pub struct TokenBuilder {
     //函数
     func: Option<Rc<dyn Fn(&[f64]) -> f64>>,
 }
+
 //TODO 如果能自由定义变量名，就需要给字母带头的、不符合要求的token都换成Variable
-#[derive(Debug,Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TokenTypeEnum {
     //注释（在词法分析时直接被丢掉了，可以说完全没用）
     Comment,
@@ -107,6 +109,7 @@ impl Token {
 
     pub fn generate_token_match_map() -> HashMap<String, Token> { //TODO 复制func
         let mut string_trans_token_map = HashMap::new();
+
         //保留字
         string_trans_token_map.insert(String::from("ORIGIN"), TokenBuilder::new().token_type(TokenTypeEnum::Origin).lexeme("ORIGIN").build());
         string_trans_token_map.insert(String::from("SCALE"), TokenBuilder::new().token_type(TokenTypeEnum::Scale).lexeme("SCALE").build());
@@ -117,29 +120,70 @@ impl Token {
         string_trans_token_map.insert(String::from("DRAW"), TokenBuilder::new().token_type(TokenTypeEnum::Draw).lexeme("DRAW").build());
         string_trans_token_map.insert(String::from("FOR"), TokenBuilder::new().token_type(TokenTypeEnum::For).lexeme("FOR").build());
         string_trans_token_map.insert(String::from("FROM"), TokenBuilder::new().token_type(TokenTypeEnum::From).lexeme("FROM").build());
+
         //分隔符
         string_trans_token_map.insert(String::from(";"), TokenBuilder::new().token_type(TokenTypeEnum::Semico).lexeme(";").build());
         string_trans_token_map.insert(String::from("("), TokenBuilder::new().token_type(TokenTypeEnum::LBracket).lexeme("(").build());
         string_trans_token_map.insert(String::from(")"), TokenBuilder::new().token_type(TokenTypeEnum::RBracket).lexeme(")").build());
         string_trans_token_map.insert(String::from(","), TokenBuilder::new().token_type(TokenTypeEnum::Comma).lexeme(",").build());
+
         //运算符
-        string_trans_token_map.insert(String::from("+"), TokenBuilder::new().token_type(TokenTypeEnum::Plus).lexeme("+").build());
-        string_trans_token_map.insert(String::from("-"), TokenBuilder::new().token_type(TokenTypeEnum::Minus).lexeme("-").build());//"--"前缀
-        string_trans_token_map.insert(String::from("*"), TokenBuilder::new().token_type(TokenTypeEnum::Mul).lexeme("*").build());//"**"前缀
-        string_trans_token_map.insert(String::from("/"), TokenBuilder::new().token_type(TokenTypeEnum::Div).lexeme("/").build());//"//"前缀
-        string_trans_token_map.insert(String::from("**"), TokenBuilder::new().token_type(TokenTypeEnum::Power).lexeme("**").build());//
+        string_trans_token_map.insert(String::from("+"), TokenBuilder::new().token_type(TokenTypeEnum::Plus).lexeme("+")
+            .func(Rc::new(|args| {
+                args[0] + args[1]
+            })).build());
+        string_trans_token_map.insert(String::from("-"), TokenBuilder::new().token_type(TokenTypeEnum::Minus).lexeme("-")
+            .func(Rc::new(|args| {
+                args[0] + args[1]
+            })).build());
+        string_trans_token_map.insert(String::from("*"), TokenBuilder::new().token_type(TokenTypeEnum::Mul).lexeme("*")
+            .func(Rc::new(|args| {
+                args[0] * args[1]
+            })).build());//"**"前缀
+        string_trans_token_map.insert(String::from("/"), TokenBuilder::new().token_type(TokenTypeEnum::Div).lexeme("/")
+            .func(Rc::new(|args| {
+                args[0] / args[1]
+            })).build());//"//"前缀
+        string_trans_token_map.insert(String::from("**"), TokenBuilder::new().token_type(TokenTypeEnum::Power).lexeme("**")
+            .func(Rc::new(|args| {
+                args[0].powf(args[1])
+            })).build());
+
         //函数名
-        string_trans_token_map.insert(String::from("SIN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("SIN").build());
-        string_trans_token_map.insert(String::from("COS"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("COS").build());
-        string_trans_token_map.insert(String::from("TAN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("TAN").build());//
-        string_trans_token_map.insert(String::from("LN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("LN").build());
-        string_trans_token_map.insert(String::from("EXP"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("EXP").build());//
-        string_trans_token_map.insert(String::from("SQRT"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("SQRT").build());
-        //参数
-        string_trans_token_map.insert(String::from("T"), TokenBuilder::new().token_type(TokenTypeEnum::Variable).lexeme("T").build());//"TAN"前缀
+        string_trans_token_map.insert(String::from("SIN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("SIN")
+            .func(Rc::new(|args| {
+                args[0].sin()
+            })).build());
+        string_trans_token_map.insert(String::from("COS"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("COS")
+            .func(Rc::new(|args| {
+                args[0].cos()
+            })).build());
+        string_trans_token_map.insert(String::from("TAN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("TAN")
+            .func(Rc::new(|args| {
+                args[0].tan()
+            })).build());
+        string_trans_token_map.insert(String::from("LN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("LN")
+            .func(Rc::new(|args| {
+                args[0].ln()
+            })).build());
+        string_trans_token_map.insert(String::from("EXP"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("EXP")
+            .func(Rc::new(|args| {
+                args[0].exp()
+            })).build());
+        string_trans_token_map.insert(String::from("SQRT"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("SQRT")
+            .func(Rc::new(|args| {
+                args[0].sqrt()
+            })).build());
+
+        //TODO 参数
+        string_trans_token_map.insert(String::from("T"), TokenBuilder::new().token_type(TokenTypeEnum::Variable).lexeme("T").build());
+
         //常数
-        string_trans_token_map.insert(String::from("PI"), TokenBuilder::new().token_type(TokenTypeEnum::ConstId).lexeme("PI").value(std::f64::consts::PI).build());
-        string_trans_token_map.insert(String::from("E"), TokenBuilder::new().token_type(TokenTypeEnum::ConstId).lexeme("E").value(std::f64::consts::E).build());//"EXP"前缀
+        string_trans_token_map.insert(String::from("PI"), TokenBuilder::new().token_type(TokenTypeEnum::ConstId).lexeme("PI")
+            .value(std::f64::consts::PI).build());
+        string_trans_token_map.insert(String::from("E"), TokenBuilder::new().token_type(TokenTypeEnum::ConstId).lexeme("E")
+            .value(std::f64::consts::E).build());//"EXP"前缀
+
         //注释
         string_trans_token_map.insert(String::from("//"), TokenBuilder::new().token_type(TokenTypeEnum::Comment).lexeme("//").build());//
         string_trans_token_map.insert(String::from("--"), TokenBuilder::new().token_type(TokenTypeEnum::Comment).lexeme("--").build());//
