@@ -106,7 +106,7 @@ impl Token {
         self.func = func;
     }
 
-    pub fn generate_token_match_map() -> HashMap<String, Token> { //TODO 复制func
+    pub fn generate_token_match_map() -> HashMap<String, Token> {
         let mut string_trans_token_map = HashMap::new();
 
         //保留字

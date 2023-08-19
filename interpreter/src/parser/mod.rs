@@ -19,7 +19,9 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) {}
+    pub fn parse(&mut self) {
+        //TODO 异常接收处理
+    }
 
     ///读取一次token并覆盖当前token
     fn fetch_token(&mut self) {
