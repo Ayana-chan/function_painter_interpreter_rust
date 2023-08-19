@@ -42,13 +42,13 @@ impl TextReader {
     }
 
     /// 从目标文件中读取一行存入缓存
-    fn read_line(&mut self) -> Result<usize, usize> {
+    fn read_line(&mut self) -> Result<(), ()> {
         let mut line = String::new();
         let size = self.aim_file_reader.read_line(&mut line).unwrap();
         self.line_buffer = line.chars().collect::<Vec<char>>();
         return match size {
-            0 => Err(0),
-            _ => Ok(size),
+            0 => Err(()),
+            _ => Ok(()),
         };
     }
 }

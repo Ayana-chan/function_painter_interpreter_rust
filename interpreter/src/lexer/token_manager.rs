@@ -1,5 +1,4 @@
 use std::collections::hash_map::HashMap;
-use std::intrinsics::sinf64;
 use std::rc::Rc;
 
 #[derive(Clone)]
@@ -93,9 +92,9 @@ impl Token {
         &self.func
     }
 
-    // pub fn set_token_type(&mut self, token_type: TokenTypeEnum) {
-    //     self.token_type = token_type;
-    // }
+    pub fn set_token_type(&mut self, token_type: TokenTypeEnum) {
+        self.token_type = token_type;
+    }
     pub fn set_lexeme(&mut self, lexeme: &str) {
         let lexeme = String::from(lexeme);
         self.lexeme = lexeme;
