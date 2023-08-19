@@ -9,7 +9,7 @@ pub trait ExceptionTrait {
 
 //作为派生类的异常要实现的trait
 trait BaseExceptionTrait {
-    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Box<dyn ExceptionTrait>;
+    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Exception;
 }
 
 ///异常
@@ -18,10 +18,10 @@ pub struct Exception {
 }
 
 impl BaseExceptionTrait for Exception {
-    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Box<dyn ExceptionTrait> {
-        Box::new(Self {
+    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Exception {
+        Self {
             sub_exception
-        })
+        }
     }
 }
 
@@ -39,7 +39,7 @@ pub struct AnalysisException {
 }
 
 impl BaseExceptionTrait for AnalysisException {
-    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Box<dyn ExceptionTrait> {
+    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Exception {
         //指定基类为Exception
         Exception::generate(Box::new(Self {
             sub_exception
@@ -60,7 +60,7 @@ pub struct RuntimeException {
 }
 
 impl BaseExceptionTrait for RuntimeException {
-    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Box<dyn ExceptionTrait> {
+    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Exception {
         Exception::generate(Box::new(Self {
             sub_exception
         }))
@@ -80,7 +80,7 @@ pub struct UnknownTokenError {
 }
 
 impl UnknownTokenError {
-    pub fn new(token: &lexer::Token) -> Box<dyn ExceptionTrait> {
+    pub fn new(token: &lexer::Token) -> Exception {
         AnalysisException::generate(Box::new(Self {
             token: token.clone()
         }))
