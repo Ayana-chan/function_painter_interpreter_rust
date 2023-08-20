@@ -1,5 +1,4 @@
 use std::cell::{RefCell, RefMut};
-use std::collections::HashMap;
 use std::fs::File;
 use std::rc::Rc;
 
@@ -108,6 +107,7 @@ impl ParserManager {
     ///FOR var FROM ex1 TO ex2 STEP ex3 DRAW(ex4,ex5)
     fn parse_for_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::For)?;
+        //这里暂时只能是T。这也是为什么规定T和variable分开，如果功能拓展了就能一视同仁
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::T)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::From)?;
         let from = self.expression_parser().parse_expression_entrance()?.calculate();
@@ -124,7 +124,14 @@ impl ParserManager {
         let y_expression = self.expression_parser().parse_expression_entrance()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::RBracket)?;
 
-        //TODO 生成所有点
+        //生成所有点
+        let mut curr_t = from;
+        while curr_t <= to{
+            self.expression_parser().set_t(curr_t);
+            //TODO 统计越界点，打印warning
+            let _ = self.point_manager().add_point((x_expression.calculate(),y_expression.calculate()));
+            curr_t+=step;
+        }
 
         Ok(())
     }
@@ -151,11 +158,10 @@ pub struct ParserKernel {
 impl ParserKernel {
     pub fn new(file: File) -> Self {
         let mut lexer = Lexer::new(file);
-        let mut ans = Self {
+        Self {
             curr_token: lexer.fetch_token(), //刚开始读一个以保证逻辑一致性
             lexer,
-        };
-        ans
+        }
     }
 
     ///检查当前token是否匹配目标，如果匹配则成功并读取一次token，否则会返回语法错误SyntaxError

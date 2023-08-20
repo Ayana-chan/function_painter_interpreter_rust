@@ -135,7 +135,7 @@ impl Token {
             })).build());
         string_trans_token_map.insert(String::from("-"), TokenBuilder::new().token_type(TokenTypeEnum::Minus).lexeme("-")
             .func(Rc::new(|args| {
-                args[0] + args[1]
+                args[0] - args[1]
             })).build());
         string_trans_token_map.insert(String::from("*"), TokenBuilder::new().token_type(TokenTypeEnum::Mul).lexeme("*")
             .func(Rc::new(|args| {
