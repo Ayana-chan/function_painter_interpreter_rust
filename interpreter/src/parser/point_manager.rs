@@ -7,7 +7,7 @@ pub struct PointManager {
     min_y: f64,
     max_y: f64,
 
-    point_storage: Rc<RefCell<Vec<(f64, f64)>>>, //可以低消耗地共享
+    point_storage: Option<Vec<(f64, f64)>>, //可以低消耗地共享
 
     var_origin: (f64, f64),
     var_scale: (f64, f64),
@@ -18,12 +18,12 @@ impl PointManager {
     pub fn new() -> Self {
         //TODO 自定义范围大小
         Self {
-            min_x: -800.0,
-            max_x: 800.0,
-            min_y: -500.0,
-            max_y: -500.0,
+            min_x: -8000.0,
+            max_x: 8000.0,
+            min_y: -5000.0,
+            max_y: 5000.0,
 
-            point_storage: Rc::new(RefCell::new(Vec::new())),
+            point_storage: Some(Vec::new()),
 
             var_origin: (0.0, 0.0),
             var_scale: (1.0, 1.0),
@@ -41,16 +41,17 @@ impl PointManager {
             //越界，无视该点
             return Err(());
         }
-        self.get_mut_point_storage().push(new_point);
+        self.extract_mut_point_storage().push(new_point);
         Ok(())
     }
 
-    fn get_mut_point_storage(&self) -> RefMut<Vec<(f64, f64)>> {
-        self.point_storage.borrow_mut()
+    fn extract_mut_point_storage(&mut self) -> &mut Vec<(f64, f64)> {
+        let Some(ps) =  &mut self.point_storage else { panic!("PointManager: point_storage is None.")};
+        ps
     }
 
-    pub fn get_point_storage(&self) -> Rc<RefCell<Vec<(f64, f64)>>> {
-        self.point_storage.clone()
+    pub fn point_storage(&mut self) -> Vec<(f64, f64)>{
+        self.point_storage.take().unwrap()
     }
 
     pub fn set_var_origin(&mut self, var_origin: (f64, f64)) {

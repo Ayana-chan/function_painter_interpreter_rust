@@ -1,9 +1,12 @@
+use std::fs::File;
+
 mod lexer;
 mod parser;
 mod exception;
 
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+pub fn interpret(file: File) -> Vec<(f64, f64)>{
+    let mut parser = parser::ParserManager::new(file);
+    parser.parse()
 }
 
 #[cfg(test)]
@@ -11,8 +14,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn test_interpret() {
+        let file = File::open("parse_test.txt").unwrap();
+        let result = interpret(file);
+        println!("Result: {:?}",result);
     }
 }
