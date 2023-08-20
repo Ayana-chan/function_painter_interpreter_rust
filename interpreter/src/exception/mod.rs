@@ -55,21 +55,21 @@ impl ExceptionTrait for AnalysisException {
 }
 
 ///无法识别的Token
-pub struct UnknownTokenError {
-    token: Token,
+pub struct IllegalTokenError {
+    lexeme: String,
 }
 
-impl UnknownTokenError {
-    pub fn new(token: &Token) -> Exception {
+impl IllegalTokenError {
+    pub fn new(lexeme: &str) -> Exception {
         AnalysisException::generate(Box::new(Self {
-            token: token.clone()
+            lexeme: String::from(lexeme)
         }))
     }
 }
 
-impl ExceptionTrait for UnknownTokenError {
+impl ExceptionTrait for IllegalTokenError {
     fn print_exception(&self) {
-        println!("Unknown Token: {:?}", self.token);
+        println!("Illegal Symbol: {}", self.lexeme);
     }
 }
 
@@ -141,9 +141,7 @@ mod tests {
 
     #[test]
     fn test_print_exception() {
-        UnknownTokenError::new(&TokenBuilder::new()
-            .token_type(TokenTypeEnum::ErrToken)
-            .lexeme("12uuu").build())
+        IllegalTokenError::new("123abc")
             .print_exception();
     }
 }

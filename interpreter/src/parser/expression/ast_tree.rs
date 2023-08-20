@@ -1,5 +1,6 @@
+use std::borrow::Borrow;
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use crate::lexer;
 
 pub trait ASTNode {
@@ -11,7 +12,7 @@ pub trait ASTNode {
 fn print_tree_prefix_tab(level: i32){
     print!("  |");
     for _ in 0..level {
-        print!("          |");
+        print!("       |");
     }
 }
 fn print_tree_prefix_begin(level: i32){
@@ -19,7 +20,7 @@ fn print_tree_prefix_begin(level: i32){
         print!("->/");
     }else{
         print_tree_prefix_tab(level-1);
-        print!("--------->/");
+        print!("----->/");
     }
 }
 fn print_tree_prefix_end(level: i32){
@@ -27,7 +28,7 @@ fn print_tree_prefix_end(level: i32){
         print!("  `");
     }else{
         print_tree_prefix_tab(level-1);
-        print!("          `");
+        print!("       `");
     }
     println!();
 }
@@ -96,7 +97,7 @@ impl ASTNode for ConstNode {
         print_tree_prefix_begin(level);
         println!("$ {:?}",self.value);
 
-        // print_tree_prefix_end(level);
+        print_tree_prefix_end(level);
     }
 }
 
@@ -148,11 +149,11 @@ impl ASTNode for FuncNode {
 pub struct VariableNode {
     token_type: lexer::TokenTypeEnum,
     variable_name: String,
-    value_reference: Rc<RefCell<f64>>,
+    value_reference: Rc<RefCell<dyn ASTNode>>,
 }
 
 impl VariableNode {
-    pub fn new(token: &lexer::Token, value_reference: &Rc<RefCell<f64>>) -> Self {
+    pub fn new(token: &lexer::Token, value_reference: &Rc<RefCell<dyn ASTNode>>) -> Self {
         VariableNode {
             token_type: token.token_type(),
             variable_name: token.lexeme().parse().unwrap(),
@@ -163,7 +164,7 @@ impl VariableNode {
 
 impl ASTNode for VariableNode {
     fn calculate(&self) -> f64 {
-        *self.value_reference.borrow()
+        (*self.value_reference).borrow().calculate()
     }
 
     fn print_tree(&self, level: i32) {
@@ -172,7 +173,7 @@ impl ASTNode for VariableNode {
         print_tree_prefix_tab(level);
         println!(": {}",self.variable_name);
         print_tree_prefix_tab(level);
-        println!("= {:?}",*self.value_reference.borrow());
+        println!("= {:?}",(*self.value_reference).borrow().calculate());
 
         print_tree_prefix_end(level);
     }
@@ -253,20 +254,14 @@ mod tests {
         let token2 = TokenBuilder::new().token_type(TokenTypeEnum::Variable)
             .lexeme("val").build();
 
-        let val: f64 = 8.5;
-        let val_refer: Rc<RefCell<f64>> = Rc::new(RefCell::new(val));
+        let val= ConstNode::new(8.5);
+        let val_refer: Rc<RefCell<dyn ASTNode>> = Rc::new(RefCell::new(val));
         let val_node = VariableNode::new(&token2, &val_refer);
         let const_node = ConstNode::new(5.0);
         let binary_node = BinaryNode::new(&token1, Rc::new(val_node), Rc::new(const_node));
 
         let mut ans = binary_node.calculate();
         assert_eq!(ans, 13.5);
-
-        //修改值
-        *val_refer.borrow_mut()+=1.0;
-
-        ans = binary_node.calculate();
-        assert_eq!(ans, 14.5);
 
         binary_node.print_tree(0);
     }

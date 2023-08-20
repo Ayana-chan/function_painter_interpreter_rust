@@ -42,7 +42,9 @@ pub enum TokenTypeEnum {
     For,
     From,
 
-    //参数
+    //for语句固定参数
+    T,
+    //变量
     Variable,
 
     //分隔符
@@ -174,8 +176,8 @@ impl Token {
                 args[0].sqrt()
             })).build());
 
-        //TODO 参数
-        string_trans_token_map.insert(String::from("T"), TokenBuilder::new().token_type(TokenTypeEnum::Variable).lexeme("T").build());
+        //参数
+        string_trans_token_map.insert(String::from("T"), TokenBuilder::new().token_type(TokenTypeEnum::T).lexeme("T").build());
 
         //常数
         string_trans_token_map.insert(String::from("PI"), TokenBuilder::new().token_type(TokenTypeEnum::ConstId).lexeme("PI")

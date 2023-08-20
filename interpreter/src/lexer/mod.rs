@@ -87,7 +87,7 @@ impl Lexer {
         }
     }
 
-    ///字母开头。保留字、函数名、参数、常数。吃掉字母、数字，最后去Map进行匹配 TODO 参数
+    ///字母开头。保留字、函数名、参数、变量、常数。吃掉字母、数字，最后去Map进行匹配
     fn collect_word_token(&mut self) -> Token {
         let mut lexeme_char_vec: Vec<char> = Vec::new();
         loop {
@@ -102,7 +102,21 @@ impl Lexer {
         }
         let lexeme: String = lexeme_char_vec.into_iter().collect();
 
-        self.match_token(&lexeme)
+        match self.token_match_map.get(&lexeme) {
+            Some(token) => {
+                return (*token).clone();
+            }
+            None => {
+                //可能是新的变量名
+                for ch in lexeme.chars() {
+                    //变量名不能包含字母数字以外的符号
+                    if !ch.is_ascii_alphabetic() && !ch.is_ascii_digit() {
+                        return Token::generate_err_token(&lexeme);
+                    }
+                }
+                return TokenBuilder::new().token_type(TokenTypeEnum::Variable).lexeme(&lexeme).build();
+            }
+        };
     }
 
     ///运算符、分隔符。只有单符号和双符号
@@ -114,28 +128,28 @@ impl Lexer {
         //指数
         if aim_char == '*' {
             //要看下一个符号是什么
-            if let Some(ch)=self.get_curr_char(){
-                if *ch == '*'{
+            if let Some(ch) = self.get_curr_char() {
+                if *ch == '*' {
                     self.read_new_char();
-                    return self.match_token("**");
+                    return self.token_match_map.get("**").unwrap().clone();
                 }
             }
         }
 
         //行注释
-        if aim_char == '/'{
+        if aim_char == '/' {
             //要看下一个符号是什么
-            if let Some(ch)=self.get_curr_char(){
-                if *ch == '/'{
+            if let Some(ch) = self.get_curr_char() {
+                if *ch == '/' {
                     self.read_new_char();
                     //读到行末或EOF
                     loop {
                         self.read_new_char();
                         if let Some(ch) = self.get_curr_char() {
                             if *ch == '\n' || *ch == '\r' { //换行
-                                break
+                                break;
                             }
-                        }else{
+                        } else {
                             break; //EOF
                         }
                     }
@@ -145,7 +159,7 @@ impl Lexer {
             }
         }
 
-        return self.match_token(&String::from(aim_char));
+        return self.token_match_map.get(&String::from(aim_char)).unwrap().clone();
     }
 
     ///获取curr_char
@@ -156,14 +170,6 @@ impl Lexer {
     ///读取新的char并覆盖当前curr_char
     fn read_new_char(&mut self) {
         self.curr_char = self.text_reader.eat_char();
-    }
-
-    ///在系统符号表中匹配token
-    fn match_token(&self, lexeme: &str) -> Token {
-        return match self.token_match_map.get(lexeme) {
-            Some(token) => (*token).clone(),
-            None =>  Token::generate_err_token(&lexeme)
-        };
     }
 }
 
@@ -180,13 +186,13 @@ mod tests {
 
         let text = "+";
 
-        let mut token1 = lexer.match_token(text);
+        let mut token1 = lexer.token_match_map.get(text).unwrap().clone();
         println!("token: {:?}", token1);
 
         token1.set_lexeme("//");
         println!("change local token: {:?}", token1);
 
-        let token2 = lexer.match_token(text);
+        let token2 = lexer.token_match_map.get(text).unwrap();
         println!("again get token: {:?}", token2);
 
         assert_eq!(text, token2.lexeme());
@@ -200,9 +206,9 @@ mod tests {
         // let token = lexer.fetch_token();
         loop {
             let token = lexer.fetch_token();
-            println!("{:?}",token);
-            if token.token_type()==TokenTypeEnum::NonToken{
-                break
+            println!("{:?}", token);
+            if token.token_type() == TokenTypeEnum::NonToken {
+                break;
             }
         }
     }

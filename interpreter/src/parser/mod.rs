@@ -108,14 +108,7 @@ impl ParserManager {
     ///FOR var FROM ex1 TO ex2 STEP ex3 DRAW(ex4,ex5)
     fn parse_for_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::For)?;
-
-        //注册参数
-        if self.get_mut_parser_kernel().get_curr_token_type() == TokenTypeEnum::Variable {
-            let variable_name = self.get_mut_parser_kernel().get_curr_token().lexeme().clone();
-            self.get_mut_parser_kernel().variable_symbol_table().insert(variable_name, Rc::new(RefCell::new(0.0)));
-        }
-        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Variable)?;
-
+        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::T)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::From)?;
         let from = self.expression_parser().parse_expression_entrance()?.calculate();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::To)?;
@@ -133,8 +126,6 @@ impl ParserManager {
 
         //TODO 生成所有点
 
-
-        //TODO 删除参数
         Ok(())
     }
 
@@ -155,21 +146,23 @@ impl ParserManager {
 pub struct ParserKernel {
     curr_token: Token,
     lexer: Lexer,
-    variable_symbol_table: HashMap<String, Rc<RefCell<f64>>>, //变量符号表，符号名->值
 }
 
 impl ParserKernel {
     pub fn new(file: File) -> Self {
         let mut lexer = Lexer::new(file);
-        Self {
+        let mut ans = Self {
             curr_token: lexer.fetch_token(), //刚开始读一个以保证逻辑一致性
             lexer,
-            variable_symbol_table: HashMap::new(),
-        }
+        };
+        ans
     }
 
     ///检查当前token是否匹配目标，如果匹配则成功并读取一次token，否则会返回语法错误SyntaxError
     pub fn match_and_eat_token(&mut self, expected_token_type: TokenTypeEnum) -> exception::Result<()> {
+        if self.curr_token.token_type() == TokenTypeEnum::ErrToken {
+            return Err(exception::IllegalTokenError::new(&self.curr_token.lexeme()));
+        }
         if self.curr_token.token_type() != expected_token_type {
             return Err(exception::SyntaxError::new(&self.curr_token, &[expected_token_type]));
         }
@@ -183,10 +176,6 @@ impl ParserKernel {
 
     pub fn get_curr_token_type(&self) -> TokenTypeEnum {
         self.curr_token.token_type()
-    }
-
-    pub fn variable_symbol_table(&mut self) -> &mut HashMap<String, Rc<RefCell<f64>>> {
-        &mut self.variable_symbol_table
     }
 
     ///帮助自动生成语法错误，附有期望的token type

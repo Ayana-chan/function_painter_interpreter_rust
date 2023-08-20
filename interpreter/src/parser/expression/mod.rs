@@ -1,20 +1,31 @@
 use std::cell::{RefCell, RefMut};
+use std::collections::HashMap;
 use std::rc::Rc;
 use crate::{exception, parser, lexer};
 
 pub use ast_tree::ASTNode;
+use crate::parser::expression::ast_tree::ConstNode;
 
 mod ast_tree;
 
 pub struct ExpressionParser {
     parser_kernel: Rc<RefCell<parser::ParserKernel>>,
+    //表达式变量符号表，符号名->表达式
+    variable_symbol_table: HashMap<String, Rc<RefCell<dyn ast_tree::ASTNode>>>,
 }
 
 impl ExpressionParser {
     pub fn new(parser_kernel: &Rc<RefCell<parser::ParserKernel>>) -> Self {
-        ExpressionParser {
+        let mut ans = ExpressionParser {
             parser_kernel: parser_kernel.clone(),
-        }
+            variable_symbol_table: HashMap::new(),
+        };
+        //刚开始就注册T参数
+        ans.variable_symbol_table().insert(
+            String::from("T"),
+            Rc::new(RefCell::new(ast_tree::ConstNode::new(0.0)))
+        );
+        ans
     }
 
     //TODO 控制语法树的打印开关
@@ -118,15 +129,15 @@ impl ExpressionParser {
                 self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
                 Ok(Box::new(ans_node))
             }
-            //参数
-            lexer::TokenTypeEnum::Variable => {
-                let mut pk = self.get_mut_parser_kernel(); //让生命周期略延长
+            //变量
+            lexer::TokenTypeEnum::Variable | lexer::TokenTypeEnum::T => {
                 //获取参数
-                let var_name = pk.get_curr_token().lexeme().clone();
-                let var_value = pk.variable_symbol_table().get(&var_name);
+                let var_name = self.get_mut_parser_kernel().get_curr_token().lexeme().clone();
+                let var_value = self.variable_symbol_table().get(&var_name);
                 if let Some(variable_reference) = var_value {
+                    let variable_reference = variable_reference.clone(); //防止生命周期太长导致的借用冲突
                     let ans_node = ast_tree::VariableNode::new(
-                        self.get_mut_parser_kernel().get_curr_token(), variable_reference, //TODO 为什么没有clone？pk的生命周期有没有问题？
+                        self.get_mut_parser_kernel().get_curr_token(), &variable_reference,
                     );
                     self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
                     Ok(Box::new(ans_node))
@@ -180,6 +191,10 @@ impl ExpressionParser {
 
     pub fn get_mut_parser_kernel(&self) -> RefMut<parser::ParserKernel> {
         self.parser_kernel.borrow_mut()
+    }
+
+    pub fn variable_symbol_table(&mut self) -> &mut HashMap<String, Rc<RefCell<dyn ASTNode>>> {
+        &mut self.variable_symbol_table
     }
 }
 
