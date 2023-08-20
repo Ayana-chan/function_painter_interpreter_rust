@@ -82,7 +82,7 @@ impl Token {
     pub fn token_type(&self) -> TokenTypeEnum {
         self.token_type
     }
-    pub fn lexeme(&self) -> &str {
+    pub fn lexeme(&self) -> &String {
         &self.lexeme
     }
     pub fn value(&self) -> f64 {

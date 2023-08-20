@@ -33,7 +33,7 @@ impl ExceptionTrait for Exception {
     }
 }
 
-///编译时异常
+///编译时异常------
 struct AnalysisException {
     sub_exception: Box<dyn ExceptionTrait>,
 }
@@ -50,26 +50,6 @@ impl BaseExceptionTrait for AnalysisException {
 impl ExceptionTrait for AnalysisException {
     fn print_exception(&self) {
         println!("*** Analysis Error ***");
-        self.sub_exception.print_exception();
-    }
-}
-
-///运行时异常
-struct RuntimeException {
-    sub_exception: Box<dyn ExceptionTrait>,
-}
-
-impl BaseExceptionTrait for RuntimeException {
-    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Exception {
-        Exception::generate(Box::new(Self {
-            sub_exception
-        }))
-    }
-}
-
-impl ExceptionTrait for RuntimeException {
-    fn print_exception(&self) {
-        println!("*** Runtime Error ***");
         self.sub_exception.print_exception();
     }
 }
@@ -113,6 +93,45 @@ impl ExceptionTrait for SyntaxError {
         println!("Syntax Error: {:?}", self.token);
         println!("Except: {:?}", self.expect_token_types);
         println!("Found : {:?}", self.token.token_type());
+    }
+}
+
+///运行时异常------
+struct RuntimeException {
+    sub_exception: Box<dyn ExceptionTrait>,
+}
+
+impl BaseExceptionTrait for RuntimeException {
+    fn generate(sub_exception: Box<dyn ExceptionTrait>) -> Exception {
+        Exception::generate(Box::new(Self {
+            sub_exception
+        }))
+    }
+}
+
+impl ExceptionTrait for RuntimeException {
+    fn print_exception(&self) {
+        println!("*** Runtime Error ***");
+        self.sub_exception.print_exception();
+    }
+}
+
+///未定义变量错误
+pub struct UndefinedVariableError {
+    variable_name: String,
+}
+
+impl UndefinedVariableError {
+    pub fn new(variable_name: &str) -> Exception {
+        RuntimeException::generate(Box::new(Self {
+            variable_name: variable_name.parse().unwrap()
+        }))
+    }
+}
+
+impl ExceptionTrait for UndefinedVariableError {
+    fn print_exception(&self) {
+        println!("Undefined Variable Error: {:?}", self.variable_name);
     }
 }
 

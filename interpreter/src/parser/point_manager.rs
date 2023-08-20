@@ -1,3 +1,4 @@
+use std::cell::{RefCell, RefMut};
 use std::rc::Rc;
 
 pub struct PointManager {
@@ -6,7 +7,7 @@ pub struct PointManager {
     min_y: f64,
     max_y: f64,
 
-    point_storage: Rc<Vec<(f64, f64)>>, //可以低消耗地共享
+    point_storage: Rc<RefCell<Vec<(f64, f64)>>>, //可以低消耗地共享
 
     var_origin: (f64, f64),
     var_scale: (f64, f64),
@@ -22,7 +23,7 @@ impl PointManager {
             min_y: -500.0,
             max_y: -500.0,
 
-            point_storage: Rc::new(Vec::new()),
+            point_storage: Rc::new(RefCell::new(Vec::new())),
 
             var_origin: (0.0, 0.0),
             var_scale: (1.0, 1.0),
@@ -37,11 +38,15 @@ impl PointManager {
             //越界，无视该点
             return Err(());
         }
-        self.point_storage.push(new_point);
+        self.get_mut_point_storage().push(new_point);
         Ok(())
     }
 
-    pub fn get_point_storage(&self) -> Rc<Vec<(f64, f64)>> {
+    fn get_mut_point_storage(&self) -> RefMut<Vec<(f64, f64)>> {
+        self.point_storage.borrow_mut()
+    }
+
+    pub fn get_point_storage(&self) -> Rc<RefCell<Vec<(f64, f64)>>> {
         self.point_storage.clone()
     }
 

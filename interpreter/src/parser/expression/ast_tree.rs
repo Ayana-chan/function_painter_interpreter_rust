@@ -41,7 +41,7 @@ pub struct BinaryNode {
 }
 
 impl BinaryNode {
-    pub fn new(token: lexer::Token, left: Rc<dyn ASTNode>, right: Rc<dyn ASTNode>) -> Self {
+    pub fn new(token: &lexer::Token, left: Rc<dyn ASTNode>, right: Rc<dyn ASTNode>) -> Self {
         BinaryNode {
             token_type: token.token_type(),
             func: token.func().clone(),
@@ -80,10 +80,9 @@ pub struct ConstNode {
 }
 
 impl ConstNode {
-    pub fn new(token: lexer::Token) -> Self {
+    pub fn new(value: f64) -> Self {
         ConstNode {
-            // token_type: token.token_type(),
-            value: token.value(),
+            value,
         }
     }
 }
@@ -110,7 +109,7 @@ pub struct FuncNode {
 }
 
 impl FuncNode {
-    pub fn new(token: lexer::Token, arg_nodes: Vec<Rc<dyn ASTNode>>) -> Self {
+    pub fn new(token: &lexer::Token, arg_nodes: Vec<Rc<dyn ASTNode>>) -> Self {
         FuncNode {
             token_type: token.token_type(),
             func_name: token.lexeme().parse().unwrap(),
@@ -153,7 +152,7 @@ pub struct VariableNode {
 }
 
 impl VariableNode {
-    pub fn new(token: lexer::Token, value_reference: &Rc<RefCell<f64>>) -> Self {
+    pub fn new(token: &lexer::Token, value_reference: &Rc<RefCell<f64>>) -> Self {
         VariableNode {
             token_type: token.token_type(),
             variable_name: token.lexeme().parse().unwrap(),
@@ -193,14 +192,10 @@ mod tests {
             println!("binary_node {} + {} ans = {}", args[0], args[1], ans);
             ans
         })).build();
-        let token2 = TokenBuilder::new().token_type(TokenTypeEnum::ConstId)
-            .lexeme("12.5").value(12.5).build();
-        let token3 = TokenBuilder::new().token_type(TokenTypeEnum::ConstId)
-            .lexeme("5.3").value(5.3).build();
 
-        let const_node1 = ConstNode::new(token2);
-        let const_node2 = ConstNode::new(token3);
-        let binary_node = BinaryNode::new(token1, Rc::new(const_node1), Rc::new(const_node2));
+        let const_node1 = ConstNode::new(12.5);
+        let const_node2 = ConstNode::new(5.3);
+        let binary_node = BinaryNode::new(&token1, Rc::new(const_node1), Rc::new(const_node2));
 
         let ans = binary_node.calculate();
         assert_eq!(ans, 17.8);
@@ -225,26 +220,18 @@ mod tests {
             println!("binary_node {} + {} ans = {}", args[0], args[1], ans);
             ans
         })).build();
-        let token3 = TokenBuilder::new().token_type(TokenTypeEnum::ConstId)
-            .lexeme("4.2").value(4.2).build();
-        let token4 = TokenBuilder::new().token_type(TokenTypeEnum::ConstId)
-            .lexeme("0.8").value(0.8).build();
-        let token5 = TokenBuilder::new().token_type(TokenTypeEnum::ConstId)
-            .lexeme("5.0").value(5.0).build();
-        let token6 = TokenBuilder::new().token_type(TokenTypeEnum::ConstId)
-            .lexeme("5.0").value(5.0).build();
 
-        let const_node1 = ConstNode::new(token3);
-        let const_node2 = ConstNode::new(token4);
-        let const_node3 = ConstNode::new(token5);
-        let const_node4 = ConstNode::new(token6);
-        let binary_node = BinaryNode::new(token2, Rc::new(const_node1), Rc::new(const_node2));
+        let const_node1 = ConstNode::new(4.2);
+        let const_node2 = ConstNode::new(0.8);
+        let const_node3 = ConstNode::new(5.0);
+        let const_node4 = ConstNode::new(5.0);
+        let binary_node = BinaryNode::new(&token2, Rc::new(const_node1), Rc::new(const_node2));
 
         let mut args: Vec<Rc<dyn ASTNode>> = Vec::new();
         args.push(Rc::new(binary_node));
         args.push(Rc::new(const_node3));
         args.push(Rc::new(const_node4));
-        let func_node = FuncNode::new(token1, args);
+        let func_node = FuncNode::new(&token1, args);
 
         let mut ans = func_node.calculate();
         println!("func_node (4.2+0.8) * 5.0 * 5.0 ans = {}", ans);
@@ -265,14 +252,12 @@ mod tests {
         })).build();
         let token2 = TokenBuilder::new().token_type(TokenTypeEnum::Variable)
             .lexeme("val").build();
-        let token3 = TokenBuilder::new().token_type(TokenTypeEnum::ConstId)
-            .lexeme("5.0").value(5.0).build();
 
         let val: f64 = 8.5;
         let val_refer: Rc<RefCell<f64>> = Rc::new(RefCell::new(val));
-        let val_node = VariableNode::new(token2, &val_refer);
-        let const_node = ConstNode::new(token3);
-        let binary_node = BinaryNode::new(token1, Rc::new(val_node), Rc::new(const_node));
+        let val_node = VariableNode::new(&token2, &val_refer);
+        let const_node = ConstNode::new(5.0);
+        let binary_node = BinaryNode::new(&token1, Rc::new(val_node), Rc::new(const_node));
 
         let mut ans = binary_node.calculate();
         assert_eq!(ans, 13.5);
