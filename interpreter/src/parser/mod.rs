@@ -34,7 +34,7 @@ impl ParserManager {
             panic!("Program Terminated due to an Error.");
         }
         //返回结果点集
-        self.point_manager().point_storage()
+        self.point_manager().move_point_storage()
     }
 
     ///分析程序
@@ -127,11 +127,11 @@ impl ParserManager {
 
         //生成所有点
         let mut curr_t = from;
-        while curr_t <= to{
+        while curr_t <= to {
             self.expression_parser().set_t(curr_t);
             //TODO 统计越界点，打印warning
-            let _ = self.point_manager().add_point((x_expression.calculate(),y_expression.calculate()));
-            curr_t+=step;
+            let _ = self.point_manager().add_point((x_expression.calculate(), y_expression.calculate()));
+            curr_t += step;
         }
 
         Ok(())

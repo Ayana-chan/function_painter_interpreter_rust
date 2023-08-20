@@ -1,6 +1,3 @@
-use std::cell::{RefCell, RefMut};
-use std::rc::Rc;
-
 pub struct PointManager {
     min_x: f64,
     max_x: f64,
@@ -34,7 +31,7 @@ impl PointManager {
     ///添加一个点
     pub fn add_point(&mut self, new_point: (f64, f64)) -> Result<(), ()> {
         //TODO 计算点位置
-        println!("Debug: Add Point: {:?}",new_point);
+        println!("Debug: Add Point: {:?}", new_point);
 
         if new_point.0 < self.min_x || new_point.0 > self.max_x
             || new_point.1 < self.min_y || new_point.1 > self.max_y {
@@ -46,11 +43,14 @@ impl PointManager {
     }
 
     fn extract_mut_point_storage(&mut self) -> &mut Vec<(f64, f64)> {
-        let Some(ps) =  &mut self.point_storage else { panic!("PointManager: point_storage is None.")};
-        ps
+        if let Some(ps) = &mut self.point_storage {
+            return ps;
+        } else {
+            panic!("PointManager: point_storage is None.")
+        }
     }
 
-    pub fn point_storage(&mut self) -> Vec<(f64, f64)>{
+    pub fn move_point_storage(&mut self) -> Vec<(f64, f64)> {
         self.point_storage.take().unwrap()
     }
 

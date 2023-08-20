@@ -11,7 +11,7 @@ pub struct ExpressionParser {
     parser_kernel: Rc<RefCell<parser::ParserKernel>>,
     //表达式变量符号表，符号名->表达式
     variable_symbol_table: HashMap<String, Rc<RefCell<dyn ast_tree::ASTNode>>>,
-    argument_t:  Rc<RefCell<f64>>, //参数T
+    argument_t: Rc<RefCell<f64>>, //参数T
 }
 
 impl ExpressionParser {
@@ -32,7 +32,7 @@ impl ExpressionParser {
     }
 
     ///加减，左结合
-    fn parse_expression(&mut self) -> exception::Result<Box<dyn ASTNode>>{
+    fn parse_expression(&mut self) -> exception::Result<Box<dyn ASTNode>> {
         let mut left_node_ref = self.parse_term()?;
         let mut token_type = self.get_mut_parser_kernel().get_curr_token_type();
 
@@ -89,7 +89,7 @@ impl ExpressionParser {
                 return Ok(Box::new(ans_node));
             }
             //+num则直接视为num
-            return Ok(num_node_ref)
+            return Ok(num_node_ref);
         }
 
         //没有正负号，直接视为Atom
@@ -125,7 +125,7 @@ impl ExpressionParser {
                 Ok(Box::new(ans_node))
             }
             //参数T
-            lexer::TokenTypeEnum::T =>{
+            lexer::TokenTypeEnum::T => {
                 let ans_node = ast_tree::TNode::new(&self.argument_t);
                 self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
                 Ok(Box::new(ans_node))
@@ -191,8 +191,8 @@ impl ExpressionParser {
         };
     }
 
-    pub fn set_t(&mut self,value: f64){
-        *self.argument_t.borrow_mut()=value;
+    pub fn set_t(&mut self, value: f64) {
+        *self.argument_t.borrow_mut() = value;
     }
 
     pub fn get_mut_parser_kernel(&self) -> RefMut<parser::ParserKernel> {

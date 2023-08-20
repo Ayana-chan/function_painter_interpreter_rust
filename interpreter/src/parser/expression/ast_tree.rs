@@ -4,29 +4,31 @@ use crate::lexer;
 
 pub trait ASTNode {
     fn calculate(&self) -> f64;
-    fn print_tree(&self,level: i32);
+    fn print_tree(&self, level: i32);
 }
 
 //用于辅助print语法树的三个函数
-fn print_tree_prefix_tab(level: i32){
+fn print_tree_prefix_tab(level: i32) {
     print!("  |");
     for _ in 0..level {
         print!("       |");
     }
 }
-fn print_tree_prefix_begin(level: i32){
-    if level==0{
+
+fn print_tree_prefix_begin(level: i32) {
+    if level == 0 {
         print!("->/");
-    }else{
-        print_tree_prefix_tab(level-1);
+    } else {
+        print_tree_prefix_tab(level - 1);
         print!("----->/");
     }
 }
-fn print_tree_prefix_end(level: i32){
-    if level==0{
+
+fn print_tree_prefix_end(level: i32) {
+    if level == 0 {
         print!("  `");
-    }else{
-        print_tree_prefix_tab(level-1);
+    } else {
+        print_tree_prefix_tab(level - 1);
         print!("       `");
     }
     println!();
@@ -60,14 +62,14 @@ impl ASTNode for BinaryNode {
 
     fn print_tree(&self, level: i32) {
         print_tree_prefix_begin(level);
-        println!("$ {:?}",self.token_type);
+        println!("$ {:?}", self.token_type);
 
         print_tree_prefix_tab(level);
         println!();
-        self.left.print_tree(level+1);
+        self.left.print_tree(level + 1);
         // print_tree_prefix_tab(level);
         // println!();
-        self.right.print_tree(level+1);
+        self.right.print_tree(level + 1);
 
         print_tree_prefix_end(level);
     }
@@ -93,7 +95,7 @@ impl ASTNode for ConstNode {
 
     fn print_tree(&self, level: i32) {
         print_tree_prefix_begin(level);
-        println!("$ {:?}",self.value);
+        println!("$ {:?}", self.value);
 
         print_tree_prefix_end(level);
     }
@@ -129,14 +131,14 @@ impl ASTNode for FuncNode {
 
     fn print_tree(&self, level: i32) {
         print_tree_prefix_begin(level);
-        println!("$ {:?}",self.token_type);
+        println!("$ {:?}", self.token_type);
         print_tree_prefix_tab(level);
-        println!(": {}",self.func_name);
+        println!(": {}", self.func_name);
 
         print_tree_prefix_tab(level);
         println!();
         for arg_node in &self.arg_nodes {
-            arg_node.print_tree(level+1)
+            arg_node.print_tree(level + 1)
         }
 
         print_tree_prefix_end(level);
@@ -163,7 +165,7 @@ impl ASTNode for TNode {
 
     fn print_tree(&self, level: i32) {
         print_tree_prefix_begin(level);
-        println!("$ {:?}",lexer::TokenTypeEnum::T);
+        println!("$ {:?}", lexer::TokenTypeEnum::T);
 
         print_tree_prefix_end(level);
     }
@@ -191,9 +193,9 @@ impl ASTNode for VariableNode {
 
     fn print_tree(&self, level: i32) {
         print_tree_prefix_begin(level);
-        println!("$ {:?}",lexer::TokenTypeEnum::Variable);
+        println!("$ {:?}", lexer::TokenTypeEnum::Variable);
         print_tree_prefix_tab(level);
-        println!(": {}",self.variable_name);
+        println!(": {}", self.variable_name);
         //TODO 打印其所属语法树
 
         // print_tree_prefix_tab(level);
@@ -278,7 +280,7 @@ mod tests {
         let token2 = TokenBuilder::new().token_type(TokenTypeEnum::Variable)
             .lexeme("val").build();
 
-        let val= ConstNode::new(8.5);
+        let val = ConstNode::new(8.5);
         let val_refer: Rc<RefCell<dyn ASTNode>> = Rc::new(RefCell::new(val));
         let val_node = VariableNode::new(token2.lexeme(), &val_refer);
         let const_node = ConstNode::new(5.0);

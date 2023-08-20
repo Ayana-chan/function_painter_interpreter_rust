@@ -4,7 +4,7 @@ mod lexer;
 mod parser;
 mod exception;
 
-pub fn interpret(file: File) -> Vec<(f64, f64)>{
+pub fn interpret(file: File) -> Vec<(f64, f64)> {
     let mut parser = parser::ParserManager::new(file);
     parser.parse()
 }
@@ -17,6 +17,6 @@ mod tests {
     fn test_interpret() {
         let file = File::open("parse_test.txt").unwrap();
         let result = interpret(file);
-        println!("Result: {:?}",result);
+        println!("Result: {:?}", result);
     }
 }
