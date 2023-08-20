@@ -2,6 +2,8 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 use crate::{exception, parser};
 
+// pub use ast_tree::ASTNode;
+
 mod ast_tree;
 
 pub struct ExpressionParser {

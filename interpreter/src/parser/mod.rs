@@ -8,6 +8,7 @@ use crate::exception;
 use crate::exception::ExceptionTrait;
 
 mod expression;
+mod point_manager;
 
 pub struct ParserManager {
     parser_kernel: Rc<RefCell<ParserKernel>>,
