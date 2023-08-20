@@ -32,14 +32,14 @@ impl ParserManager {
         let parse_result = self.parse_program();
         if let Err(e) = parse_result {
             e.print_exception();
-            panic!("Program Terminated.");
+            panic!("Program Terminated due to an Error.");
         }
         //TODO 返回点集
     }
 
-    ///解析语句
+    ///分析程序
     fn parse_program(&mut self) -> exception::Result<()> {
-        //ROF前一直读取
+        //EOF前一直读取
         while self.get_mut_parser_kernel().get_curr_token_type() != TokenTypeEnum::NonToken {
             //匹配一句
             self.parse_statement()?;
@@ -48,13 +48,15 @@ impl ParserManager {
         Ok(())
     }
 
+    ///分析语句
     fn parse_statement(&mut self) -> exception::Result<()> {
+        println!("Debug: parse a statement, begin token: {:?}", self.get_mut_parser_kernel().get_curr_token());
         let token_type = self.get_mut_parser_kernel().get_curr_token_type();
         match token_type {
             TokenTypeEnum::Origin => self.parse_origin_statement()?,
-            TokenTypeEnum::Scale => self.parse_origin_statement()?,
-            TokenTypeEnum::Rot => self.parse_origin_statement()?,
-            TokenTypeEnum::For => self.parse_origin_statement()?,
+            TokenTypeEnum::Scale => self.parse_scale_statement()?,
+            TokenTypeEnum::Rot => self.parse_rot_statement()?,
+            TokenTypeEnum::For => self.parse_for_statement()?,
             _ => return self.get_mut_parser_kernel().generate_syntax_error(&[
                 TokenTypeEnum::Origin, TokenTypeEnum::Scale, TokenTypeEnum::Rot, TokenTypeEnum::For
             ]),
@@ -94,7 +96,7 @@ impl ParserManager {
 
     ///ROT IS ex
     fn parse_rot_statement(&mut self) -> exception::Result<()> {
-        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Scale)?;
+        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Rot)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Is)?;
         let r = self.expression_parser().parse_expression_entrance()?.calculate();
 
@@ -108,9 +110,9 @@ impl ParserManager {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::For)?;
 
         //注册参数
-        if self.get_mut_parser_kernel().get_curr_token_type() == TokenTypeEnum::Variable{
+        if self.get_mut_parser_kernel().get_curr_token_type() == TokenTypeEnum::Variable {
             let variable_name = self.get_mut_parser_kernel().get_curr_token().lexeme().clone();
-            self.get_mut_parser_kernel().variable_symbol_table().insert(variable_name,Rc::new(RefCell::new(0.0)));
+            self.get_mut_parser_kernel().variable_symbol_table().insert(variable_name, Rc::new(RefCell::new(0.0)));
         }
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Variable)?;
 
@@ -168,16 +170,11 @@ impl ParserKernel {
 
     ///检查当前token是否匹配目标，如果匹配则成功并读取一次token，否则会返回语法错误SyntaxError
     pub fn match_and_eat_token(&mut self, expected_token_type: TokenTypeEnum) -> exception::Result<()> {
-        if self.curr_token.token_type() == expected_token_type {
+        if self.curr_token.token_type() != expected_token_type {
             return Err(exception::SyntaxError::new(&self.curr_token, &[expected_token_type]));
         }
-        self.fetch_token();
-        Ok(())
-    }
-
-    ///读取一次token并覆盖当前token
-    pub fn fetch_token(&mut self) {
         self.curr_token = self.lexer.fetch_token();
+        Ok(())
     }
 
     pub fn get_curr_token(&self) -> &Token {
@@ -197,6 +194,22 @@ impl ParserKernel {
         Err(exception::SyntaxError::new(&self.get_curr_token(), expected_token_type))
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use std::fs::File;
+
+    use super::*;
+
+    #[test]
+    fn test_parse() {
+        let file = File::open("parse_test.txt").unwrap();
+        let mut parser = ParserManager::new(file);
+        parser.parse();
+    }
+}
+
 
 
 

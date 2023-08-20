@@ -91,7 +91,7 @@ impl SyntaxError {
 impl ExceptionTrait for SyntaxError {
     fn print_exception(&self) {
         println!("Syntax Error: {:?}", self.token);
-        println!("Except: {:?}", self.expect_token_types);
+        println!("Expect: {:?}", self.expect_token_types);
         println!("Found : {:?}", self.token.token_type());
     }
 }

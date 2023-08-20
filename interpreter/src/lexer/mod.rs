@@ -30,6 +30,7 @@ impl Lexer {
 
     ///获取下一个token
     pub fn fetch_token(&mut self) -> Token {
+        // println!("Debug: fetch_token");
         //略过空白项
         self.skip_whitespace();
 
@@ -86,7 +87,7 @@ impl Lexer {
         }
     }
 
-    ///字母开头。保留字、函数名、参数、常数。吃掉字母、数字，最后去Map进行匹配
+    ///字母开头。保留字、函数名、参数、常数。吃掉字母、数字，最后去Map进行匹配 TODO 参数
     fn collect_word_token(&mut self) -> Token {
         let mut lexeme_char_vec: Vec<char> = Vec::new();
         loop {
@@ -115,6 +116,7 @@ impl Lexer {
             //要看下一个符号是什么
             if let Some(ch)=self.get_curr_char(){
                 if *ch == '*'{
+                    self.read_new_char();
                     return self.match_token("**");
                 }
             }
@@ -125,6 +127,7 @@ impl Lexer {
             //要看下一个符号是什么
             if let Some(ch)=self.get_curr_char(){
                 if *ch == '/'{
+                    self.read_new_char();
                     //读到行末或EOF
                     loop {
                         self.read_new_char();
@@ -155,7 +158,7 @@ impl Lexer {
         self.curr_char = self.text_reader.eat_char();
     }
 
-    ///在符号表中匹配token
+    ///在系统符号表中匹配token
     fn match_token(&self, lexeme: &str) -> Token {
         return match self.token_match_map.get(lexeme) {
             Some(token) => (*token).clone(),
@@ -190,8 +193,8 @@ mod tests {
     }
 
     #[test]
-    fn test_read_token_until_eof() {
-        let file = File::open("lex_test.txt").unwrap();
+    fn test_lex() {
+        let file = File::open("parse_test.txt").unwrap();
         let mut lexer = Lexer::new(file);
 
         // let token = lexer.fetch_token();

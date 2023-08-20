@@ -16,10 +16,10 @@ fn print_tree_prefix_tab(level: i32){
 }
 fn print_tree_prefix_begin(level: i32){
     if level==0{
-        print!("->|");
+        print!("->/");
     }else{
         print_tree_prefix_tab(level-1);
-        print!("--------->|");
+        print!("--------->/");
     }
 }
 fn print_tree_prefix_end(level: i32){

@@ -18,16 +18,17 @@ impl ExpressionParser {
     }
 
     //TODO 控制语法树的打印开关
-    ///分析表达式，返回语法树。加减，左结合
+    ///分析表达式，返回语法树
     pub fn parse_expression_entrance(&mut self) -> exception::Result<Box<dyn ASTNode>> {
         let ans_tree = self.parse_expression()?;
         ans_tree.print_tree(0);
         Ok(ans_tree)
     }
-    
+
+    ///加减，左结合
     fn parse_expression(&mut self) -> exception::Result<Box<dyn ASTNode>>{
         let mut left_node_ref = self.parse_term()?;
-        let token_type = self.get_mut_parser_kernel().get_curr_token_type();
+        let mut token_type = self.get_mut_parser_kernel().get_curr_token_type();
 
         //迭代
         while token_type == lexer::TokenTypeEnum::Plus || token_type == lexer::TokenTypeEnum::Minus {
@@ -38,6 +39,8 @@ impl ExpressionParser {
                 &expression_token, Rc::from(left_node_ref), Rc::from(right_node_ref),
             );
             left_node_ref = Box::new(ans_node);
+
+            token_type = self.get_mut_parser_kernel().get_curr_token_type();
         }
 
         Ok(left_node_ref)
@@ -46,7 +49,7 @@ impl ExpressionParser {
     ///乘除，左结合
     fn parse_term(&mut self) -> exception::Result<Box<dyn ASTNode>> {
         let mut left_node_ref = self.parse_factor()?;
-        let token_type = self.get_mut_parser_kernel().get_curr_token_type();
+        let mut token_type = self.get_mut_parser_kernel().get_curr_token_type();
 
         //迭代
         while token_type == lexer::TokenTypeEnum::Mul || token_type == lexer::TokenTypeEnum::Div {
@@ -57,6 +60,9 @@ impl ExpressionParser {
                 &term_token, Rc::from(left_node_ref), Rc::from(right_node_ref),
             );
             left_node_ref = Box::new(ans_node);
+
+            //更新token_type
+            token_type = self.get_mut_parser_kernel().get_curr_token_type();
         }
 
         Ok(left_node_ref)
@@ -65,19 +71,23 @@ impl ExpressionParser {
     ///一元正负
     fn parse_factor(&mut self) -> exception::Result<Box<dyn ASTNode>> {
         let token_type = self.get_mut_parser_kernel().get_curr_token_type();
-        let token = self.get_mut_parser_kernel().get_curr_token().clone();
-        self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
-        let num_node_ref = self.parse_component()?;
+        if token_type == parser::TokenTypeEnum::Minus || token_type == parser::TokenTypeEnum::Plus {
+            let token = self.get_mut_parser_kernel().get_curr_token().clone();
+            self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
+            let num_node_ref = self.parse_component()?;
 
-        //-num看成0-num
-        if token_type == parser::TokenTypeEnum::Minus {
-            let left_zero_node = Rc::new(ast_tree::ConstNode::new(0.0));
-            let ans_node = ast_tree::BinaryNode::new(&token, left_zero_node, Rc::from(num_node_ref));
-            return Ok(Box::new(ans_node));
+            //-num看成0-num
+            if token_type == parser::TokenTypeEnum::Minus {
+                let left_zero_node = Rc::new(ast_tree::ConstNode::new(0.0));
+                let ans_node = ast_tree::BinaryNode::new(&token, left_zero_node, Rc::from(num_node_ref));
+                return Ok(Box::new(ans_node));
+            }
+            //+num则直接视为num
+            return Ok(num_node_ref)
         }
 
-        //+num则直接视为num
-        Ok(num_node_ref)
+        //没有正负号，直接视为Atom
+        return self.parse_component();
     }
 
     ///乘方，右结合
@@ -111,11 +121,12 @@ impl ExpressionParser {
             //参数
             lexer::TokenTypeEnum::Variable => {
                 let mut pk = self.get_mut_parser_kernel(); //让生命周期略延长
+                //获取参数
                 let var_name = pk.get_curr_token().lexeme().clone();
                 let var_value = pk.variable_symbol_table().get(&var_name);
                 if let Some(variable_reference) = var_value {
                     let ans_node = ast_tree::VariableNode::new(
-                        self.get_mut_parser_kernel().get_curr_token(), variable_reference,
+                        self.get_mut_parser_kernel().get_curr_token(), variable_reference, //TODO 为什么没有clone？pk的生命周期有没有问题？
                     );
                     self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
                     Ok(Box::new(ans_node))
@@ -126,7 +137,7 @@ impl ExpressionParser {
             //括号（子表达式）
             lexer::TokenTypeEnum::LBracket => {
                 self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
-                let ans_node_ref = self.parse_expression_entrance()?;
+                let ans_node_ref = self.parse_expression()?;
                 self.get_mut_parser_kernel().match_and_eat_token(lexer::TokenTypeEnum::RBracket)?;
                 Ok(ans_node_ref)
             }
@@ -150,7 +161,7 @@ impl ExpressionParser {
                             }
                             first_arg_flag = false;
                             //获取参数表达式
-                            let new_arg_node = self.parse_expression_entrance()?;
+                            let new_arg_node = self.parse_expression()?;
                             arg_nodes.push(Rc::from(new_arg_node));
                         }
                     }
@@ -160,10 +171,9 @@ impl ExpressionParser {
                 Ok(Box::new(ans_node))
             }
             _ => {
-                let ans = self.get_mut_parser_kernel().generate_syntax_error(&[
+                self.get_mut_parser_kernel().generate_syntax_error(&[
                     lexer::TokenTypeEnum::ConstId, lexer::TokenTypeEnum::Variable, lexer::TokenTypeEnum::LBracket, lexer::TokenTypeEnum::Func
-                ]);
-                ans
+                ])
             }
         };
     }
