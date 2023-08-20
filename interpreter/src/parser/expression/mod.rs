@@ -19,7 +19,13 @@ impl ExpressionParser {
 
     //TODO 控制语法树的打印开关
     ///分析表达式，返回语法树。加减，左结合
-    pub fn parse_expression(&mut self) -> exception::Result<Box<dyn ASTNode>> {
+    pub fn parse_expression_entrance(&mut self) -> exception::Result<Box<dyn ASTNode>> {
+        let ans_tree = self.parse_expression()?;
+        ans_tree.print_tree(0);
+        Ok(ans_tree)
+    }
+    
+    fn parse_expression(&mut self) -> exception::Result<Box<dyn ASTNode>>{
         let mut left_node_ref = self.parse_term()?;
         let token_type = self.get_mut_parser_kernel().get_curr_token_type();
 
@@ -120,7 +126,7 @@ impl ExpressionParser {
             //括号（子表达式）
             lexer::TokenTypeEnum::LBracket => {
                 self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
-                let ans_node_ref = self.parse_expression()?;
+                let ans_node_ref = self.parse_expression_entrance()?;
                 self.get_mut_parser_kernel().match_and_eat_token(lexer::TokenTypeEnum::RBracket)?;
                 Ok(ans_node_ref)
             }
@@ -144,13 +150,13 @@ impl ExpressionParser {
                             }
                             first_arg_flag = false;
                             //获取参数表达式
-                            let new_arg_node = self.parse_expression()?;
+                            let new_arg_node = self.parse_expression_entrance()?;
                             arg_nodes.push(Rc::from(new_arg_node));
                         }
                     }
                 }
 
-                let ans_node = ast_tree::FuncNode::new(self.get_mut_parser_kernel().get_curr_token(), arg_nodes);
+                let ans_node = ast_tree::FuncNode::new(&func_token, arg_nodes);
                 Ok(Box::new(ans_node))
             }
             _ => {

@@ -67,9 +67,9 @@ impl ParserManager {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Origin)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Is)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::LBracket)?;
-        let x = self.expression_parser().parse_expression()?.calculate();
+        let x = self.expression_parser().parse_expression_entrance()?.calculate();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Comma)?;
-        let y = self.expression_parser().parse_expression()?.calculate();
+        let y = self.expression_parser().parse_expression_entrance()?.calculate();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::RBracket)?;
 
         self.point_manager().set_var_origin((x, y));
@@ -82,9 +82,9 @@ impl ParserManager {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Scale)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Is)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::LBracket)?;
-        let x = self.expression_parser().parse_expression()?.calculate();
+        let x = self.expression_parser().parse_expression_entrance()?.calculate();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Comma)?;
-        let y = self.expression_parser().parse_expression()?.calculate();
+        let y = self.expression_parser().parse_expression_entrance()?.calculate();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::RBracket)?;
 
         self.point_manager().set_var_scale((x, y));
@@ -96,7 +96,7 @@ impl ParserManager {
     fn parse_rot_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Scale)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Is)?;
-        let r = self.expression_parser().parse_expression()?.calculate();
+        let r = self.expression_parser().parse_expression_entrance()?.calculate();
 
         self.point_manager().set_var_rot(r);
 
@@ -115,18 +115,18 @@ impl ParserManager {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Variable)?;
 
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::From)?;
-        let from = self.expression_parser().parse_expression()?.calculate();
+        let from = self.expression_parser().parse_expression_entrance()?.calculate();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::To)?;
-        let to = self.expression_parser().parse_expression()?.calculate();
+        let to = self.expression_parser().parse_expression_entrance()?.calculate();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Step)?;
-        let step = self.expression_parser().parse_expression()?.calculate();
+        let step = self.expression_parser().parse_expression_entrance()?.calculate();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Draw)?;
 
         //点生成函数
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::LBracket)?;
-        let x_expression = self.expression_parser().parse_expression()?;
+        let x_expression = self.expression_parser().parse_expression_entrance()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Comma)?;
-        let y_expression = self.expression_parser().parse_expression()?;
+        let y_expression = self.expression_parser().parse_expression_entrance()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::RBracket)?;
 
         //TODO 生成所有点
