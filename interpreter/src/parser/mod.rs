@@ -137,16 +137,20 @@ impl ParserManager {
         Ok(())
     }
 
-    pub fn get_mut_parser_kernel(&self) -> RefMut<ParserKernel> {
-        self.parser_kernel.borrow_mut()
-    }
-
     fn point_manager(&mut self) -> &mut point_manager::PointManager {
         &mut self.point_manager
     }
 
     fn expression_parser(&mut self) -> &mut expression::ExpressionParser {
         &mut self.expression_parser
+    }
+
+    pub fn get_mut_parser_kernel(&self) -> RefMut<ParserKernel> {
+        self.parser_kernel.borrow_mut()
+    }
+
+    pub fn set_coordinate_range(&mut self, min_x: f64, max_x: f64, min_y: f64, max_y: f64){
+        self.point_manager().set_coordinate_range(min_x, max_x, min_y, max_y);
     }
 }
 

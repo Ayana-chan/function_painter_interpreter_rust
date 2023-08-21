@@ -54,6 +54,20 @@ impl PointManager {
         self.point_storage.take().unwrap()
     }
 
+    pub fn set_coordinate_range(&mut self, min_x: f64, max_x: f64, min_y: f64, max_y: f64){
+        if self.min_x >= self.max_x {
+            panic!("Drawer: min_x should be smaller than max_x.")
+        }
+        if self.min_y >= self.max_y {
+            panic!("Drawer: min_y should be smaller than max_y.")
+        }
+
+        self.min_x = min_x;
+        self.max_x = max_x;
+        self.min_y = min_y;
+        self.max_y = max_y;
+    }
+
     pub fn set_var_origin(&mut self, var_origin: (f64, f64)) {
         self.var_origin = var_origin;
     }

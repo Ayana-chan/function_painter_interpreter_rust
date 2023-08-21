@@ -4,9 +4,25 @@ mod lexer;
 mod parser;
 mod exception;
 
-pub fn interpret(file: File) -> Result<Vec<(f64, f64)>, ()> {
-    let mut parser = parser::ParserManager::new(file);
-    parser.parse()
+pub struct Interpreter {
+    parser: parser::ParserManager,
+}
+
+impl Interpreter {
+    pub fn new(file: File) -> Self {
+        Interpreter {
+            parser: parser::ParserManager::new(file),
+        }
+    }
+
+    pub fn set_coordinate_range(&mut self, min_x: f64, max_x: f64, min_y: f64, max_y: f64) {
+        self.parser.set_coordinate_range(min_x, max_x, min_y, max_y);
+    }
+
+    ///开始解释，返回结果集
+    pub fn interpret(&mut self) -> Result<Vec<(f64, f64)>, ()> {
+        self.parser.parse()
+    }
 }
 
 #[cfg(test)]
