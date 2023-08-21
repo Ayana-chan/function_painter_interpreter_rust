@@ -4,7 +4,7 @@ mod lexer;
 mod parser;
 mod exception;
 
-pub fn interpret(file: File) -> Vec<(f64, f64)> {
+pub fn interpret(file: File) -> Result<Vec<(f64, f64)>, ()> {
     let mut parser = parser::ParserManager::new(file);
     parser.parse()
 }

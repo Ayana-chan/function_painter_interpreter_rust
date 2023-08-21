@@ -27,14 +27,14 @@ impl ParserManager {
         }
     }
 
-    pub fn parse(&mut self) -> Vec<(f64, f64)> {
+    pub fn parse(&mut self) -> Result<Vec<(f64, f64)>,()> {
         let parse_result = self.parse_program();
         if let Err(e) = parse_result {
             e.print_exception();
-            panic!("Program Terminated due to an Error.");
+            return Err(());
         }
         //返回结果点集
-        self.point_manager().move_point_storage()
+        Ok(self.point_manager().move_point_storage())
     }
 
     ///分析程序

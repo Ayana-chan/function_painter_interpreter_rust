@@ -57,9 +57,13 @@ impl Drawer {
         self
     }
 
+    ///确定其他信息
+    /// caption为空串时表示不需要标题
     pub fn build_message(mut self, file_name: &str, caption: &str) -> Self {
         self.file_name = String::from(file_name);
-        self.caption = Some(String::from(caption));
+        if caption != "" {
+            self.caption = Some(String::from(caption));
+        }
         self
     }
 
@@ -73,7 +77,7 @@ impl Drawer {
             .set_label_area_size(LabelAreaPosition::Top, 45)
             .set_label_area_size(LabelAreaPosition::Bottom, 45);
 
-        if let Some(cap) = &self.caption{
+        if let Some(cap) = &self.caption {
             chart.caption(cap, ("Arial", 30).into_font());
         }
 

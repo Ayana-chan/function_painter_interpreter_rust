@@ -9,7 +9,8 @@ edition = "2021"
 members = [
     "interpreter",
     "drawer",
-    "try_test"
 ]
 
 [dependencies]
+interpreter = {path = "./interpreter"}
+drawer = {path = "./drawer"}
