@@ -1,6 +1,6 @@
-Def var1 = 4*T;
-Let var2 = 12/T;
-//ROT is 8*2--5;
+ROT is 1+2**3**4/((5+6)/7);
+//Def var1 = 4*T;
+//Let var1 = 12/T;
 //ROT is 2.1+42*2/4;
 //Scale is (1+2**4/(3+4/5),-(+6--7));
 //WTF is 114514;
