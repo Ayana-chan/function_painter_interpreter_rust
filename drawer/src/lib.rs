@@ -67,8 +67,9 @@ impl Drawer {
         self
     }
 
+    ///进行绘图 TODO 多次不同色绘图
     pub fn draw(&self, point_vec: Vec<(f64, f64)>, color: RGBColor) -> Result<(), Box<dyn std::error::Error>> {
-        let root = BitMapBackend::new("plot.png", (self.width, self.height)).into_drawing_area();
+        let root = BitMapBackend::new(&self.file_name, (self.width, self.height)).into_drawing_area();
         root.fill(&WHITE)?;
 
         let mut chart = ChartBuilder::on(&root);

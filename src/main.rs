@@ -6,7 +6,7 @@ fn main() {
     let drawer_obj = drawer::Drawer::new()
         .build_image_size(1280,720)
         .build_coordinate_range(-10.0,20.0,-10.0,20.0)
-        .build_message("draw_test","")
+        .build_message("draw_test.png","")
         .draw(point_result,drawer::colors::RED);
 }
 
