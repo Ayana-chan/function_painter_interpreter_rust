@@ -42,7 +42,7 @@ impl ExpressionParser {
             self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
             let right_node_ref = self.parse_term()?;
             let ans_node = ast_tree::BinaryNode::new(
-                &expression_token, Rc::from(left_node_ref), Rc::from(right_node_ref),
+                &expression_token, left_node_ref, right_node_ref,
             );
             left_node_ref = Box::new(ans_node);
 
@@ -63,7 +63,7 @@ impl ExpressionParser {
             self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
             let right_node_ref = self.parse_factor()?;
             let ans_node = ast_tree::BinaryNode::new(
-                &term_token, Rc::from(left_node_ref), Rc::from(right_node_ref),
+                &term_token, left_node_ref, right_node_ref,
             );
             left_node_ref = Box::new(ans_node);
 
@@ -84,8 +84,8 @@ impl ExpressionParser {
 
             //-num看成0-num
             if token_type == parser::TokenTypeEnum::Minus {
-                let left_zero_node = Rc::new(ast_tree::ConstNode::new(0.0));
-                let ans_node = ast_tree::BinaryNode::new(&token, left_zero_node, Rc::from(num_node_ref));
+                let left_zero_node = Box::new(ast_tree::ConstNode::new(0.0));
+                let ans_node = ast_tree::BinaryNode::new(&token, left_zero_node, num_node_ref);
                 return Ok(Box::new(ans_node));
             }
             //+num则直接视为num
@@ -104,7 +104,7 @@ impl ExpressionParser {
             let power_token = self.get_mut_parser_kernel().get_curr_token().clone();
             self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
             let right_node_ref = self.parse_component()?;
-            let ans_node = ast_tree::BinaryNode::new(&power_token, Rc::from(left_node_ref), Rc::from(right_node_ref));
+            let ans_node = ast_tree::BinaryNode::new(&power_token, left_node_ref, right_node_ref);
             return Ok(Box::new(ans_node));
         }
 
@@ -159,7 +159,7 @@ impl ExpressionParser {
                 let func_token = self.get_mut_parser_kernel().get_curr_token().clone();
                 self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
                 self.get_mut_parser_kernel().match_and_eat_token(lexer::TokenTypeEnum::LBracket)?;
-                let mut arg_nodes: Vec<Rc<dyn ASTNode>> = Vec::new();
+                let mut arg_nodes: Vec<Box<dyn ASTNode>> = Vec::new();
                 let mut first_arg_flag = true;//用于忽略匹配第一个参数前的逗号
                 loop {
                     let token_type = self.get_mut_parser_kernel().get_curr_token_type();
@@ -175,7 +175,7 @@ impl ExpressionParser {
                             first_arg_flag = false;
                             //获取参数表达式
                             let new_arg_node = self.parse_expression()?;
-                            arg_nodes.push(Rc::from(new_arg_node));
+                            arg_nodes.push(new_arg_node);
                         }
                     }
                 }

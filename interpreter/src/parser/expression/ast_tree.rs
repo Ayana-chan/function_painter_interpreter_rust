@@ -38,12 +38,12 @@ fn print_tree_prefix_end(level: i32) {
 pub struct BinaryNode {
     token_type: lexer::TokenTypeEnum,
     func: Rc<dyn Fn(&[f64]) -> f64>,
-    left: Rc<dyn ASTNode>,
-    right: Rc<dyn ASTNode>,
+    left: Box<dyn ASTNode>,
+    right: Box<dyn ASTNode>,
 }
 
 impl BinaryNode {
-    pub fn new(token: &lexer::Token, left: Rc<dyn ASTNode>, right: Rc<dyn ASTNode>) -> Self {
+    pub fn new(token: &lexer::Token, left: Box<dyn ASTNode>, right: Box<dyn ASTNode>) -> Self {
         BinaryNode {
             token_type: token.token_type(),
             func: token.func().clone(),
@@ -106,11 +106,11 @@ pub struct FuncNode {
     token_type: lexer::TokenTypeEnum,
     func_name: String,
     func: Rc<dyn Fn(&[f64]) -> f64>,
-    arg_nodes: Vec<Rc<dyn ASTNode>>,
+    arg_nodes: Vec<Box<dyn ASTNode>>,
 }
 
 impl FuncNode {
-    pub fn new(token: &lexer::Token, arg_nodes: Vec<Rc<dyn ASTNode>>) -> Self {
+    pub fn new(token: &lexer::Token, arg_nodes: Vec<Box<dyn ASTNode>>) -> Self {
         FuncNode {
             token_type: token.token_type(),
             func_name: token.lexeme().parse().unwrap(),
@@ -196,10 +196,9 @@ impl ASTNode for VariableNode {
         println!("$ {:?}", lexer::TokenTypeEnum::Variable);
         print_tree_prefix_tab(level);
         println!(": {}", self.variable_name);
-        //TODO 打印其所属语法树
 
-        // print_tree_prefix_tab(level);
-        // println!("= {:?}",(*self.value_reference).borrow().calculate());
+        //打印其所属语法树
+        self.expression_reference.borrow_mut().print_tree(level+1);
 
         print_tree_prefix_end(level);
     }
@@ -222,7 +221,7 @@ mod tests {
 
         let const_node1 = ConstNode::new(12.5);
         let const_node2 = ConstNode::new(5.3);
-        let binary_node = BinaryNode::new(&token1, Rc::new(const_node1), Rc::new(const_node2));
+        let binary_node = BinaryNode::new(&token1, Box::new(const_node1), Box::new(const_node2));
 
         let ans = binary_node.calculate();
         assert_eq!(ans, 17.8);
@@ -252,12 +251,12 @@ mod tests {
         let const_node2 = ConstNode::new(0.8);
         let const_node3 = ConstNode::new(5.0);
         let const_node4 = ConstNode::new(5.0);
-        let binary_node = BinaryNode::new(&token2, Rc::new(const_node1), Rc::new(const_node2));
+        let binary_node = BinaryNode::new(&token2, Box::new(const_node1), Box::new(const_node2));
 
-        let mut args: Vec<Rc<dyn ASTNode>> = Vec::new();
-        args.push(Rc::new(binary_node));
-        args.push(Rc::new(const_node3));
-        args.push(Rc::new(const_node4));
+        let mut args: Vec<Box<dyn ASTNode>> = Vec::new();
+        args.push(Box::new(binary_node));
+        args.push(Box::new(const_node3));
+        args.push(Box::new(const_node4));
         let func_node = FuncNode::new(&token1, args);
 
         let mut ans = func_node.calculate();
@@ -284,7 +283,7 @@ mod tests {
         let val_refer: Rc<RefCell<Box<dyn ASTNode>>> = Rc::new(RefCell::new(Box::new(val)));
         let val_node = VariableNode::new(token2.lexeme(), &val_refer);
         let const_node = ConstNode::new(5.0);
-        let binary_node = BinaryNode::new(&token1, Rc::new(val_node), Rc::new(const_node));
+        let binary_node = BinaryNode::new(&token1, Box::new(val_node), Box::new(const_node));
 
         let ans = binary_node.calculate();
         assert_eq!(ans, 13.5);

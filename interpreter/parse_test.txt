@@ -6,4 +6,8 @@
 //For T from 2+1 to 3 step 1.2 draw(2*T,exp(T));
 
 Def hololive = (114514+1)*2 + T;
-For T from 1 to 10 step 1 draw(T , 1 + hololive/2 + T);
+For T from 1 to 5 step 1 draw(T , 1 + hololive/2 + T);
+//reset
+Def hololive = T;
+For T from 1 to 5 step 1 draw(T , 1 + hololive/2 + T);
+
