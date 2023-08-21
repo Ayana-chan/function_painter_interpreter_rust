@@ -148,7 +148,7 @@ impl ParserManager {
     }
 
     ///定义表达式变量
-    ///DEF var = ex
+    ///DEF var = ex TODO 禁止定义T
     fn parse_def_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Def)?;
 
