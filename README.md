@@ -1,19 +1,86 @@
 
-# 介绍
+# 基本介绍
 
-使用Rust，实现了函数图像绘制语言解释器。其语法分析基于递归下降。
+使用Rust，实现了函数图像绘制语言解释器。
 
 - 表达式支持四则运算、乘方、函数、括号。
 - 支持行注释。
 - 使用FOR语句来绘制点以画出函数图像。
 - 支持平移（ORIGIN）、放大（SCALE）、旋转（ROT）。这三个操作只会影响后面绘制的点。
-- 支持**定义变量**，可以**动态置换变量**。
+- 支持**定义表达式变量**、**置换表达式变量**。
 - 可以对不同文件分别解释，然后以不同的颜色画在同一张图上。
 - 高质量的异常体系（目前只有Error没有Warning），支持细节打印、定位、期望提示，具体见下文。
 - 递归下降语法分析器，简洁而高效的词法分析器，低内存消耗、带缓存的文本文件读取器。
 
 >表达式支持的函数的语法分析接口实际上支持任意数量的参数。因此可以随意定义多参数的变量，不过这样的话可能每个函数调用都要返回Result以表明参数数量正确性了。
 >同时，这也留下了自定义多参函数的可能性，如 `fn my_function(arg_name1,arg_name_2) => 3+T\*arg_name1+arg_name2;`，尚待实现。
+
+# 简单使用
+
+所有字母不分大小写。
+
+变量名必须为字母带头、只能包含字母或数字的连续串。
+
+所有度数采用弧度制。所有旋转均为逆时针。
+
+For后的参数必须为T。T也是程序一开始就可以直接使用的变量，且禁止定义或置换。
+
+## 实例
+
+输入1：
+
+```rust
+//test_file1.txt
+For T from 1 to 100 step 0.2 draw(T/10,3*ln(T)); //绘制对数函数
+ROT is PI/4; //让之后的图像都逆时针旋转45度
+Def quadratic = T**2-5*T-3; //定义一个二次函数的表达式变量
+For T from -10 to 18 step 0.2 draw( T/5 , quadratic/10 ); //绘制二次函数
+```
+
+输入2：
+
+```rust
+Scale is (0.5,3);  
+For T from -50 to 100 step 0.2 draw(T,sin(T));
+```
+
+main函数：
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>>{  
+    //指定输入1  
+    let aim_file1 = File::open("test_file1.txt").unwrap();  
+    let mut interpreter_obj1 = interpreter::Interpreter::new(aim_file1);  
+    //限制坐标范围  
+    interpreter_obj1.set_coordinate_range(-10.0, 20.0, -10.0, 20.0);  
+    let point_result1 = interpreter_obj1.interpret().unwrap();  
+  
+    //指定输入2  
+    let aim_file2 = File::open("test_file2.txt").unwrap();  
+    let mut interpreter_obj2 = interpreter::Interpreter::new(aim_file2);  
+    //限制坐标范围  
+    interpreter_obj2.set_coordinate_range(-10.0, 20.0, -10.0, 20.0);  
+    let point_result2 = interpreter_obj2.interpret().unwrap();  
+  
+    let mut drawer_obj = drawer::Drawer::new()  
+        //指定输出图像大小  
+        .build_image_size(1280, 720)  
+        //指定坐标轴显示范围  
+        .build_coordinate_range(-10.0, 20.0, -10.0, 20.0)  
+        //指定输出文件名和标题  
+        .build_message("draw_test.png", "First Test");  
+  
+    //添加点集和颜色  
+    drawer_obj.add_task(point_result1, drawer::colors::RED);  
+    drawer_obj.add_task(point_result2, drawer::colors::BLUE);  
+    drawer_obj.draw()  
+}
+```
+
+结果图像`draw_test.png`：
+
+![400](README_source/draw_test.png)
+
 
 # 文法
 
@@ -116,7 +183,7 @@ ROT is 1+2**3**4/((5+6)/7);
 ```
 
 涉及变量的语法树见下文。
-# 变量
+# 表达式变量
 
 ## 定义 Def
 
@@ -290,7 +357,7 @@ Debug: Add Point: (2148843.5, 5.5)
 
 ```
 
-注意看倒数第二课树以及输出，很显然，hololive的重定义并不会影响Haachama：
+注意看倒数第二棵树以及输出，很显然，hololive的重定义并不会影响Haachama：
 
 ```rust
 ->/$ Variable
@@ -326,7 +393,7 @@ Debug: Add Point: (2148842.5, 4.0)
 Debug: Add Point: (2148843.5, 5.5)
 ```
 
-## 动态置换 Let
+## 置换 Let
 
 如果将hololive的重定义语句的Def换成Let，就可以动态地置换变量，也就是说**会影响该变量在Let之前、最近一次的Def之后相关的所有其他变量**。
 
@@ -368,7 +435,7 @@ Debug: Add Point: (1919813.5, 5.5)
 分析中所有的异常都会以dyn Exception的形式向上传递，汇集到ParserManager的parse处进行打印。
 
 >非保留字的、字母带头、只包含字母和数字的词都会被认为是变量，因此写错词可能也会被识别为变量。
-## 静态异常
+## 分析时异常
 
 涉及词法分析和语法分析的异常。
 
@@ -436,9 +503,6 @@ Syntax Error: Token { token_type: Semico, lexeme: ";" }
 Expect: [RBracket]
 Found : Semico
 ```
-## 运行时异常
-
-与其说是运行时异常，不如描述成“语义级异常”。
 
 ### 未定义变量
 
@@ -451,7 +515,7 @@ ROT is 8*var1+5;
 ```rust
 Interpret Terminated at 1:14
 
-*** Runtime Error ***
+*** Analysis Error ***
 Undefined Variable Error: "VAR1"
 ```
 
@@ -465,15 +529,20 @@ Let var2 = 12/T;
 ```rust
 Interpret Terminated at 3:0
 
-*** Runtime Error ***
+*** Analysis Error ***
 Undefined Variable Error: "VAR2"
 ```
+
+## 运行时异常
+### 除零错误
+
 # TODO
 
 - 块注释
 - 进一步适配多参数函数
 - 自定义函数
 - 图例
+- 坐标范围等东西都是可以直接嵌入到语言当中的，不然main函数太长了。
 
 
 
