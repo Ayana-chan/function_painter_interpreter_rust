@@ -10,7 +10,7 @@ mod ast_tree;
 pub struct ExpressionParser {
     parser_kernel: Rc<RefCell<parser::ParserKernel>>,
     //表达式变量符号表，符号名->表达式
-    variable_symbol_table: HashMap<String, Rc<RefCell<dyn ast_tree::ASTNode>>>,
+    variable_symbol_table: HashMap<String, Rc<RefCell<Box<dyn ast_tree::ASTNode>>>>,
     argument_t: Rc<RefCell<f64>>, //参数T
 }
 
@@ -199,7 +199,7 @@ impl ExpressionParser {
         self.parser_kernel.borrow_mut()
     }
 
-    pub fn variable_symbol_table(&mut self) -> &mut HashMap<String, Rc<RefCell<dyn ASTNode>>> {
+    pub fn variable_symbol_table(&mut self) -> &mut HashMap<String, Rc<RefCell<Box<dyn ASTNode>>>> {
         &mut self.variable_symbol_table
     }
 }

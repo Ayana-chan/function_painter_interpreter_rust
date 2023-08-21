@@ -27,7 +27,7 @@ impl ParserManager {
         }
     }
 
-    pub fn parse(&mut self) -> Result<Vec<(f64, f64)>,()> {
+    pub fn parse(&mut self) -> Result<Vec<(f64, f64)>, ()> {
         let parse_result = self.parse_program();
         if let Err(e) = parse_result {
             e.print_exception();
@@ -57,8 +57,9 @@ impl ParserManager {
             TokenTypeEnum::Scale => self.parse_scale_statement()?,
             TokenTypeEnum::Rot => self.parse_rot_statement()?,
             TokenTypeEnum::For => self.parse_for_statement()?,
+            TokenTypeEnum::Def => self.parse_def_statement()?,
             _ => return self.get_mut_parser_kernel().generate_syntax_error(&[
-                TokenTypeEnum::Origin, TokenTypeEnum::Scale, TokenTypeEnum::Rot, TokenTypeEnum::For
+                TokenTypeEnum::Origin, TokenTypeEnum::Scale, TokenTypeEnum::Rot, TokenTypeEnum::For, TokenTypeEnum::Def
             ]),
         }
         Ok(())
@@ -137,6 +138,22 @@ impl ParserManager {
         Ok(())
     }
 
+    ///DEF var = ex
+    fn parse_def_statement(&mut self) -> exception::Result<()> {
+        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Def)?;
+
+        let var_name = self.get_mut_parser_kernel().get_curr_token().lexeme().clone();
+        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Variable)?;
+        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Assign)?;
+
+        let ex = self.expression_parser().parse_expression_entrance()?;
+        self.expression_parser().variable_symbol_table().insert(
+            var_name, Rc::new(RefCell::new(ex)),
+        );
+
+        Ok(())
+    }
+
     fn point_manager(&mut self) -> &mut point_manager::PointManager {
         &mut self.point_manager
     }
@@ -149,7 +166,7 @@ impl ParserManager {
         self.parser_kernel.borrow_mut()
     }
 
-    pub fn set_coordinate_range(&mut self, min_x: f64, max_x: f64, min_y: f64, max_y: f64){
+    pub fn set_coordinate_range(&mut self, min_x: f64, max_x: f64, min_y: f64, max_y: f64) {
         self.point_manager().set_coordinate_range(min_x, max_x, min_y, max_y);
     }
 }

@@ -32,7 +32,7 @@ impl PointManager {
     pub fn add_point(&mut self, new_point: (f64, f64)) -> Result<(), ()> {
         //TODO 计算点位置
 
-        // println!("Debug: Add Point: {:?}", new_point);
+        println!("Debug: Add Point: {:?}", new_point);
 
         if new_point.0 < self.min_x || new_point.0 > self.max_x
             || new_point.1 < self.min_y || new_point.1 > self.max_y {

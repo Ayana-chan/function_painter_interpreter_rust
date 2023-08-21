@@ -36,11 +36,12 @@ pub enum TokenTypeEnum {
     Scale,
     Rot,
     Is,
+    For,
+    From,
     To,
     Step,
     Draw,
-    For,
-    From,
+    Def,
 
     //for语句固定参数
     T,
@@ -52,6 +53,9 @@ pub enum TokenTypeEnum {
     LBracket,
     RBracket,
     Comma,
+
+    //赋值
+    Assign,
 
     //运算符
     Plus,
@@ -116,17 +120,21 @@ impl Token {
         string_trans_token_map.insert(String::from("SCALE"), TokenBuilder::new().token_type(TokenTypeEnum::Scale).lexeme("SCALE").build());
         string_trans_token_map.insert(String::from("ROT"), TokenBuilder::new().token_type(TokenTypeEnum::Rot).lexeme("ROT").build());
         string_trans_token_map.insert(String::from("IS"), TokenBuilder::new().token_type(TokenTypeEnum::Is).lexeme("IS").build());
+        string_trans_token_map.insert(String::from("FOR"), TokenBuilder::new().token_type(TokenTypeEnum::For).lexeme("FOR").build());
+        string_trans_token_map.insert(String::from("FROM"), TokenBuilder::new().token_type(TokenTypeEnum::From).lexeme("FROM").build());
         string_trans_token_map.insert(String::from("TO"), TokenBuilder::new().token_type(TokenTypeEnum::To).lexeme("TO").build());
         string_trans_token_map.insert(String::from("STEP"), TokenBuilder::new().token_type(TokenTypeEnum::Step).lexeme("STEP").build());
         string_trans_token_map.insert(String::from("DRAW"), TokenBuilder::new().token_type(TokenTypeEnum::Draw).lexeme("DRAW").build());
-        string_trans_token_map.insert(String::from("FOR"), TokenBuilder::new().token_type(TokenTypeEnum::For).lexeme("FOR").build());
-        string_trans_token_map.insert(String::from("FROM"), TokenBuilder::new().token_type(TokenTypeEnum::From).lexeme("FROM").build());
+        string_trans_token_map.insert(String::from("DEF"), TokenBuilder::new().token_type(TokenTypeEnum::Def).lexeme("DEF").build());
 
         //分隔符
         string_trans_token_map.insert(String::from(";"), TokenBuilder::new().token_type(TokenTypeEnum::Semico).lexeme(";").build());
         string_trans_token_map.insert(String::from("("), TokenBuilder::new().token_type(TokenTypeEnum::LBracket).lexeme("(").build());
         string_trans_token_map.insert(String::from(")"), TokenBuilder::new().token_type(TokenTypeEnum::RBracket).lexeme(")").build());
         string_trans_token_map.insert(String::from(","), TokenBuilder::new().token_type(TokenTypeEnum::Comma).lexeme(",").build());
+
+        //赋值
+        string_trans_token_map.insert(String::from("="), TokenBuilder::new().token_type(TokenTypeEnum::Assign).lexeme("=").build());
 
         //运算符
         string_trans_token_map.insert(String::from("+"), TokenBuilder::new().token_type(TokenTypeEnum::Plus).lexeme("+")

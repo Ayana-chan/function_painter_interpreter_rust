@@ -174,11 +174,11 @@ impl ASTNode for TNode {
 ///变量
 pub struct VariableNode {
     variable_name: String,
-    expression_reference: Rc<RefCell<dyn ASTNode>>,
+    expression_reference: Rc<RefCell<Box<dyn ASTNode>>>,
 }
 
 impl VariableNode {
-    pub fn new(variable_name: &str, expression_reference: &Rc<RefCell<dyn ASTNode>>) -> Self {
+    pub fn new(variable_name: &str, expression_reference: &Rc<RefCell<Box<dyn ASTNode>>>) -> Self {
         VariableNode {
             variable_name: String::from(variable_name),
             expression_reference: expression_reference.clone(),
@@ -281,7 +281,7 @@ mod tests {
             .lexeme("val").build();
 
         let val = ConstNode::new(8.5);
-        let val_refer: Rc<RefCell<dyn ASTNode>> = Rc::new(RefCell::new(val));
+        let val_refer: Rc<RefCell<Box<dyn ASTNode>>> = Rc::new(RefCell::new(Box::new(val)));
         let val_node = VariableNode::new(token2.lexeme(), &val_refer);
         let const_node = ConstNode::new(5.0);
         let binary_node = BinaryNode::new(&token1, Rc::new(val_node), Rc::new(const_node));
