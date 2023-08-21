@@ -7,6 +7,10 @@ pub struct TextReader {
     line_buffer: Vec<char>,
     //line_buffer的索引，指向当前正在处理的char
     curr_handle_index: usize,
+
+    //记录目前读取的位置
+    curr_line: u32,
+    curr_col: u32,
 }
 
 impl TextReader {
@@ -15,12 +19,25 @@ impl TextReader {
             aim_file_reader: BufReader::new(aim_file),
             line_buffer: vec![],
             curr_handle_index: 0,
+
+            //正常人类会从1开始思考
+            curr_line: 1,
+            //curr_char才应该是当前字符，读完才指向被读的字符
+            curr_col: 0,
         }
     }
 
     /// 读取下一个char，覆盖当前的char
     /// 读取是按行读的，读完缓存的一行后再从文件读下一行
     pub fn eat_char(&mut self) -> Option<char> {
+        //记录上一个是不是\r
+        let mut last_r_flag = false;
+        if let Some(ch) = &self.get_char() {
+            if *ch == '\r' {
+                last_r_flag = true;
+            }
+        }
+
         self.curr_handle_index += 1;
 
         //读完了缓存，就再读一行（一直返回None就意味着EOF）
@@ -29,7 +46,26 @@ impl TextReader {
             self.curr_handle_index = 0;
         }
 
-        self.get_char()
+        let ret = self.get_char();
+
+        //记录当前字符位置
+        if let Some(ch) = &ret {
+            self.curr_col += 1;
+            if *ch == '\r' || *ch == '\n' {
+                self.curr_col = 0;
+                //遇到\r\n时，只记录\r，不记录\n。其他情况下不可能满足ch == '\n' && last_r_flag
+                if !(*ch == '\n' && last_r_flag) {
+                    self.curr_line += 1;
+                }
+            }
+        }
+
+        ret
+    }
+
+    ///获取当前正在读取的字符的位置，(line,col)
+    pub fn get_char_position(&self) -> (u32, u32) {
+        (self.curr_line, self.curr_col)
     }
 
     /// 获取当前的char

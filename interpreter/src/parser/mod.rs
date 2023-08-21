@@ -30,6 +30,9 @@ impl ParserManager {
     pub fn parse(&mut self) -> Result<Vec<(f64, f64)>, ()> {
         let parse_result = self.parse_program();
         if let Err(e) = parse_result {
+            println!();
+            let err_position = self.get_mut_parser_kernel().lexer.get_char_position();
+            println!("Interpret Terminated at {}:{}",err_position.0,err_position.1);
             e.print_exception();
             return Err(());
         }

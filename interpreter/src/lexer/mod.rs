@@ -52,6 +52,11 @@ impl Lexer {
         return Token::generate_eof_token();
     }
 
+    ///获取当前正在读取的字符的位置，(line,col)
+    pub fn get_char_position(&self)->(u32,u32){
+        self.text_reader.get_char_position()
+    }
+
     ///略过空白项
     fn skip_whitespace(&mut self) {
         loop {
