@@ -134,8 +134,8 @@ impl ExpressionParser {
             lexer::TokenTypeEnum::Variable => {
                 //获取参数
                 let var_name = self.get_mut_parser_kernel().get_curr_token().lexeme().clone();
-                let var_value = self.variable_symbol_table().get(&var_name);
-                if let Some(expression_reference) = var_value {
+                let expression_reference = self.variable_symbol_table().get(&var_name);
+                if let Some(expression_reference) = expression_reference {
                     let expression_reference = expression_reference.clone(); //防止生命周期太长导致的借用冲突
                     let ans_node = ast_tree::VariableNode::new(
                         self.get_mut_parser_kernel().get_curr_token().lexeme(), &expression_reference,
