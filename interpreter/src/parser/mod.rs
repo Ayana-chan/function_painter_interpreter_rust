@@ -58,13 +58,16 @@ impl ParserManager {
             TokenTypeEnum::Rot => self.parse_rot_statement()?,
             TokenTypeEnum::For => self.parse_for_statement()?,
             TokenTypeEnum::Def => self.parse_def_statement()?,
+            TokenTypeEnum::Let => self.parse_let_statement()?,
             _ => return self.get_mut_parser_kernel().generate_syntax_error(&[
-                TokenTypeEnum::Origin, TokenTypeEnum::Scale, TokenTypeEnum::Rot, TokenTypeEnum::For, TokenTypeEnum::Def
+                TokenTypeEnum::Origin, TokenTypeEnum::Scale, TokenTypeEnum::Rot,
+                TokenTypeEnum::For, TokenTypeEnum::Def,TokenTypeEnum::Let
             ]),
         }
         Ok(())
     }
 
+    ///平移
     ///ORIGIN IS (ex1,ex2)
     fn parse_origin_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Origin)?;
@@ -80,6 +83,7 @@ impl ParserManager {
         Ok(())
     }
 
+    ///放大
     ///SCALE IS (ex1,ex2)
     fn parse_scale_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Scale)?;
@@ -95,6 +99,7 @@ impl ParserManager {
         Ok(())
     }
 
+    ///旋转
     ///ROT IS ex
     fn parse_rot_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Rot)?;
@@ -106,6 +111,7 @@ impl ParserManager {
         Ok(())
     }
 
+    ///绘制
     ///FOR var FROM ex1 TO ex2 STEP ex3 DRAW(ex4,ex5)
     fn parse_for_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::For)?;
@@ -138,6 +144,7 @@ impl ParserManager {
         Ok(())
     }
 
+    ///定义表达式变量
     ///DEF var = ex
     fn parse_def_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Def)?;
@@ -150,6 +157,26 @@ impl ParserManager {
         self.expression_parser().variable_symbol_table().insert(
             var_name, Rc::new(RefCell::new(ex)),
         );
+
+        Ok(())
+    }
+
+    ///重赋值表达式变量
+    ///LET var = ex
+    fn parse_let_statement(&mut self) -> exception::Result<()> {
+        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Let)?;
+
+        let var_name = self.get_mut_parser_kernel().get_curr_token().lexeme().clone();
+        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Variable)?;
+        self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Assign)?;
+
+        let ex = self.expression_parser().parse_expression_entrance()?;
+        let var_ref = self.expression_parser().variable_symbol_table().get(&var_name);
+        if let Some(var_ref) = var_ref {
+            *var_ref.borrow_mut() = ex;
+        } else {
+            return Err(exception::UndefinedVariableError::new(&var_name));
+        }
 
         Ok(())
     }
@@ -223,7 +250,8 @@ mod tests {
     fn test_parse() {
         let file = File::open("parse_test.txt").unwrap();
         let mut parser = ParserManager::new(file);
-        parser.parse();
+        let res = parser.parse();
+        println!("Res: {:?}",res);
     }
 }
 

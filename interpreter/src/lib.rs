@@ -35,5 +35,6 @@ mod tests {
         let mut interpreter_obj = Interpreter::new(file);
         // interpreter_obj.set_coordinate_range(-100.0, 200.0, -100.0, 200.0);
         let point_result = interpreter_obj.interpret().unwrap();
+        println!("point_result: {:?}",point_result);
     }
 }

@@ -42,6 +42,7 @@ pub enum TokenTypeEnum {
     Step,
     Draw,
     Def,
+    Let,
 
     //for语句固定参数
     T,
@@ -98,9 +99,9 @@ impl Token {
         &self.func
     }
 
-    pub fn set_token_type(&mut self, token_type: TokenTypeEnum) {
-        self.token_type = token_type;
-    }
+    // pub fn set_token_type(&mut self, token_type: TokenTypeEnum) {
+    //     self.token_type = token_type;
+    // }
     pub fn set_lexeme(&mut self, lexeme: &str) {
         let lexeme = String::from(lexeme);
         self.lexeme = lexeme;
@@ -126,6 +127,7 @@ impl Token {
         string_trans_token_map.insert(String::from("STEP"), TokenBuilder::new().token_type(TokenTypeEnum::Step).lexeme("STEP").build());
         string_trans_token_map.insert(String::from("DRAW"), TokenBuilder::new().token_type(TokenTypeEnum::Draw).lexeme("DRAW").build());
         string_trans_token_map.insert(String::from("DEF"), TokenBuilder::new().token_type(TokenTypeEnum::Def).lexeme("DEF").build());
+        string_trans_token_map.insert(String::from("LET"), TokenBuilder::new().token_type(TokenTypeEnum::Let).lexeme("LET").build());
 
         //分隔符
         string_trans_token_map.insert(String::from(";"), TokenBuilder::new().token_type(TokenTypeEnum::Semico).lexeme(";").build());
