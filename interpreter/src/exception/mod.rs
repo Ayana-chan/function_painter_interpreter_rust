@@ -27,7 +27,7 @@ impl BaseExceptionTrait for Exception {
 
 impl ExceptionTrait for Exception {
     fn print_exception(&self) {
-        println!();//TODO 错误定位
+        println!();
         self.sub_exception.print_exception();
         println!();
     }

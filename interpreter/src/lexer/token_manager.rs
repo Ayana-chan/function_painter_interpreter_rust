@@ -25,7 +25,6 @@ pub struct TokenBuilder {
     func: Option<Rc<dyn Fn(&[f64]) -> f64>>,
 }
 
-//TODO 如果能自由定义变量名，就需要给字母带头的、不符合要求的token都换成Variable
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TokenTypeEnum {
     //注释（在词法分析时直接被丢掉了，可以说完全没用）
@@ -102,10 +101,10 @@ impl Token {
     // pub fn set_token_type(&mut self, token_type: TokenTypeEnum) {
     //     self.token_type = token_type;
     // }
-    pub fn set_lexeme(&mut self, lexeme: &str) {
-        let lexeme = String::from(lexeme);
-        self.lexeme = lexeme;
-    }
+    // pub fn set_lexeme(&mut self, lexeme: &str) {
+    //     let lexeme = String::from(lexeme);
+    //     self.lexeme = lexeme;
+    // }
     pub fn set_value(&mut self, value: f64) {
         self.value = value;
     }

@@ -9,11 +9,13 @@ pub struct PointManager {
     var_origin: (f64, f64),
     var_scale: (f64, f64),
     var_rot: f64,
+    //提前运算以加速
+    var_rot_sin: f64,
+    var_rot_cos: f64,
 }
 
 impl PointManager {
     pub fn new() -> Self {
-        //TODO 自定义范围大小
         Self {
             min_x: -8000.0,
             max_x: 8000.0,
@@ -25,12 +27,20 @@ impl PointManager {
             var_origin: (0.0, 0.0),
             var_scale: (1.0, 1.0),
             var_rot: 0.0,
+            var_rot_sin: 0.0,
+            var_rot_cos: 1.0,
         }
     }
 
     ///添加一个点
-    pub fn add_point(&mut self, new_point: (f64, f64)) -> Result<(), ()> {
-        //TODO 计算点位置
+    pub fn add_point(&mut self, mut new_point: (f64, f64)) -> Result<(), ()> {
+        //计算点位置
+        new_point.0 *= self.var_scale.0;
+        new_point.1 *= self.var_scale.1;
+        let temp_x = &new_point.0 * &self.var_rot_cos - &new_point.1 * &self.var_rot_sin;
+        let temp_y = &new_point.0 * &self.var_rot_sin + &new_point.1 * &self.var_rot_cos;
+        new_point.0 = temp_x+self.var_origin.0;
+        new_point.1 = temp_y+self.var_origin.1;
 
         println!("Debug: Add Point: {:?}", new_point);
 
@@ -55,7 +65,7 @@ impl PointManager {
         self.point_storage.take().unwrap()
     }
 
-    pub fn set_coordinate_range(&mut self, min_x: f64, max_x: f64, min_y: f64, max_y: f64){
+    pub fn set_coordinate_range(&mut self, min_x: f64, max_x: f64, min_y: f64, max_y: f64) {
         if self.min_x >= self.max_x {
             panic!("Drawer: min_x should be smaller than max_x.")
         }
@@ -77,6 +87,9 @@ impl PointManager {
     }
     pub fn set_var_rot(&mut self, var_rot: f64) {
         self.var_rot = var_rot;
+        //预计算
+        self.var_rot_sin = var_rot.sin();
+        self.var_rot_cos = var_rot.cos();
     }
 
     // pub fn min_x(&self) -> f64 {

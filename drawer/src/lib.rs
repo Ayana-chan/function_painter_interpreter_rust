@@ -130,6 +130,7 @@ impl Drawer {
         Ok(())
     }
 
+    //TODO 自动生成坐标范围
     fn auto_calculate_coordinate_range(&mut self) {}
 }
 
