@@ -437,7 +437,8 @@ Debug: Add Point: (1919813.5, 5.5)
 分析中所有的异常都会以dyn Exception的形式向上传递，汇集到ParserManager的parse处进行打印。
 
 >非保留字的、字母带头、只包含字母和数字的词都会被认为是变量，因此写错词可能也会被识别为变量。
-## 分析时异常
+
+## 分析级异常
 
 涉及词法分析和语法分析的异常。
 
@@ -506,6 +507,12 @@ Expect: [RBracket]
 Found : Semico
 ```
 
+## 语义级异常
+
+起名为Runtime Error。
+
+修正：所有包含除以0或无穷大的点都被直接丢掉而非报错。
+
 ### 未定义变量
 
 表达式中发现未定义的变量就会报错：
@@ -517,7 +524,7 @@ ROT is 8*var1+5;
 ```rust
 Interpret Terminated at 1:14
 
-*** Analysis Error ***
+*** Runtime Error ***
 Undefined Variable Error: "VAR1"
 ```
 
@@ -529,14 +536,11 @@ Let var2 = 12/T;
 ```
 
 ```rust
-Interpret Terminated at 3:0
+Interpret Terminated at 2:11
 
-*** Analysis Error ***
+*** Runtime Error ***
 Undefined Variable Error: "VAR2"
 ```
-
-## 运行时异常
-### 除零错误
 
 # TODO
 
