@@ -89,6 +89,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
 
 ![400](README_source/draw_test1.png)
 
+>图像其实被拉长了，因为虽然横坐标轴和纵坐标轴的范围是一样的，但是长度不同。
+
 ## 函数
 
 >可以查看`interpreter/src/lexer/token_manager.rs`中的`pub fn generate_token_match_map() -> HashMap<String, Token>`函数来浏览所支持的函数及其逻辑。
