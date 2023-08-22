@@ -135,6 +135,29 @@ impl ExceptionTrait for UndefinedVariableError {
     }
 }
 
+///参数数量不匹配错误
+pub struct ArgumentNumberNotMatchError {
+    received_num: usize,
+    target_num: usize,
+}
+
+impl ArgumentNumberNotMatchError {
+    pub fn new(received_num: usize, target_num: usize) -> Exception {
+        RuntimeException::generate(Box::new(Self {
+            received_num,
+            target_num,
+        }))
+    }
+}
+
+impl ExceptionTrait for ArgumentNumberNotMatchError {
+    fn print_exception(&self) {
+        println!("Arguments' Number not Match Error:");
+        println!("Expect : {:?}",self.target_num);
+        println!("Receive: {:?}",self.received_num);
+    }
+}
+
 
 #[cfg(test)]
 mod tests {

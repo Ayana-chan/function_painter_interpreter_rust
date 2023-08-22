@@ -1,5 +1,6 @@
 use std::collections::hash_map::HashMap;
 use std::rc::Rc;
+use crate::exception;
 
 #[derive(Clone)]
 pub struct Token {
@@ -10,7 +11,7 @@ pub struct Token {
     //数值
     value: f64,
     //函数
-    func: Rc<dyn Fn(&[f64]) -> f64>,
+    func: Rc<dyn Fn(&[f64]) -> exception::Result<f64>>,
 }
 
 ///用于建造Token（建造者模式）
@@ -22,7 +23,7 @@ pub struct TokenBuilder {
     //数值
     value: Option<f64>,
     //函数
-    func: Option<Rc<dyn Fn(&[f64]) -> f64>>,
+    func: Option<Rc<dyn Fn(&[f64]) -> exception::Result<f64>>>,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -94,7 +95,7 @@ impl Token {
     pub fn value(&self) -> f64 {
         self.value
     }
-    pub fn func(&self) -> &Rc<dyn Fn(&[f64]) -> f64> {
+    pub fn func(&self) -> &Rc<dyn Fn(&[f64]) -> exception::Result<f64>> {
         &self.func
     }
 
@@ -108,8 +109,16 @@ impl Token {
     pub fn set_value(&mut self, value: f64) {
         self.value = value;
     }
-    pub fn set_func(&mut self, func: Rc<dyn Fn(&[f64]) -> f64>) {
+    pub fn set_func(&mut self, func: Rc<dyn Fn(&[f64]) -> exception::Result<f64>>) {
         self.func = func;
+    }
+
+    //工具函数，判断参数数量是否等同于目标
+    pub fn judge_arg_num_equal(args: &[f64], target_num: usize) -> exception::Result<f64>{
+        if args.len()!=target_num{
+            return Err(exception::ArgumentNumberNotMatchError::new(args.len(),target_num));
+        }
+        Ok(0.0)
     }
 
     pub fn generate_token_match_map() -> HashMap<String, Token> {
@@ -140,49 +149,75 @@ impl Token {
         //运算符
         string_trans_token_map.insert(String::from("+"), TokenBuilder::new().token_type(TokenTypeEnum::Plus).lexeme("+")
             .func(Rc::new(|args| {
-                args[0] + args[1]
+                Token::judge_arg_num_equal(args,2)?;
+                Ok(args[0] + args[1])
             })).build());
         string_trans_token_map.insert(String::from("-"), TokenBuilder::new().token_type(TokenTypeEnum::Minus).lexeme("-")
             .func(Rc::new(|args| {
-                args[0] - args[1]
+                Token::judge_arg_num_equal(args,2)?;
+                Ok(args[0] - args[1])
             })).build());
         string_trans_token_map.insert(String::from("*"), TokenBuilder::new().token_type(TokenTypeEnum::Mul).lexeme("*")
             .func(Rc::new(|args| {
-                args[0] * args[1]
+                Token::judge_arg_num_equal(args,2)?;
+                Ok(args[0] * args[1])
             })).build());//"**"前缀
         string_trans_token_map.insert(String::from("/"), TokenBuilder::new().token_type(TokenTypeEnum::Div).lexeme("/")
             .func(Rc::new(|args| {
-                args[0] / args[1]
+                Token::judge_arg_num_equal(args,2)?;
+                Ok(args[0] / args[1])
             })).build());//"//"前缀
         string_trans_token_map.insert(String::from("**"), TokenBuilder::new().token_type(TokenTypeEnum::Power).lexeme("**")
             .func(Rc::new(|args| {
-                args[0].powf(args[1])
+                Token::judge_arg_num_equal(args,2)?;
+                Ok(args[0].powf(args[1]))
             })).build());
 
         //函数名
         string_trans_token_map.insert(String::from("SIN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("SIN")
             .func(Rc::new(|args| {
-                args[0].sin()
+                Token::judge_arg_num_equal(args,1)?;
+                Ok(args[0].sin())
             })).build());
         string_trans_token_map.insert(String::from("COS"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("COS")
             .func(Rc::new(|args| {
-                args[0].cos()
+                Token::judge_arg_num_equal(args,1)?;
+                Ok(args[0].cos())
             })).build());
         string_trans_token_map.insert(String::from("TAN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("TAN")
             .func(Rc::new(|args| {
-                args[0].tan()
+                Token::judge_arg_num_equal(args,1)?;
+                Ok(args[0].tan())
             })).build());
         string_trans_token_map.insert(String::from("LN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("LN")
             .func(Rc::new(|args| {
-                args[0].ln()
+                Token::judge_arg_num_equal(args,1)?;
+                Ok(args[0].ln())
             })).build());
         string_trans_token_map.insert(String::from("EXP"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("EXP")
             .func(Rc::new(|args| {
-                args[0].exp()
+                Token::judge_arg_num_equal(args,1)?;
+                Ok(args[0].exp())
             })).build());
         string_trans_token_map.insert(String::from("SQRT"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("SQRT")
             .func(Rc::new(|args| {
-                args[0].sqrt()
+                Token::judge_arg_num_equal(args,1)?;
+                Ok(args[0].sqrt())
+            })).build());
+        string_trans_token_map.insert(String::from("ABS"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("ABS")
+            .func(Rc::new(|args| {
+                Token::judge_arg_num_equal(args,1)?;
+                Ok(args[0].abs())
+            })).build());
+        string_trans_token_map.insert(String::from("MAX"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("MAX")
+            .func(Rc::new(|args| {
+                Token::judge_arg_num_equal(args,2)?;
+                Ok(args[0].max(args[1]))
+            })).build());
+        string_trans_token_map.insert(String::from("MIN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("MIN")
+            .func(Rc::new(|args| {
+                Token::judge_arg_num_equal(args,2)?;
+                Ok(args[0].min(args[1]))
             })).build());
 
         //参数
@@ -237,7 +272,7 @@ impl TokenBuilder {
         self
     }
 
-    pub fn func(mut self, func: Rc<dyn Fn(&[f64]) -> f64>) -> Self {
+    pub fn func(mut self, func: Rc<dyn Fn(&[f64]) -> exception::Result<f64>>) -> Self {
         self.func = Some(func);
         self
     }
@@ -247,7 +282,7 @@ impl TokenBuilder {
             token_type: self.token_type.unwrap(),
             lexeme: self.lexeme.unwrap(),
             value: 0.0,
-            func: Rc::new(|_args| -> f64{ 0.0 }),
+            func: Rc::new(|_args| { Ok(0.0) }),
         };
 
         if let Some(value) = self.value {

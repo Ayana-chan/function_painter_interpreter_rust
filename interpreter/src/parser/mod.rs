@@ -76,9 +76,9 @@ impl ParserManager {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Origin)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Is)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::LBracket)?;
-        let x = self.expression_parser().parse_expression_entrance()?.calculate();
+        let x = self.expression_parser().parse_expression_entrance()?.calculate()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Comma)?;
-        let y = self.expression_parser().parse_expression_entrance()?.calculate();
+        let y = self.expression_parser().parse_expression_entrance()?.calculate()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::RBracket)?;
 
         self.point_manager().set_var_origin((x, y));
@@ -92,9 +92,9 @@ impl ParserManager {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Scale)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Is)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::LBracket)?;
-        let x = self.expression_parser().parse_expression_entrance()?.calculate();
+        let x = self.expression_parser().parse_expression_entrance()?.calculate()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Comma)?;
-        let y = self.expression_parser().parse_expression_entrance()?.calculate();
+        let y = self.expression_parser().parse_expression_entrance()?.calculate()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::RBracket)?;
 
         self.point_manager().set_var_scale((x, y));
@@ -107,7 +107,7 @@ impl ParserManager {
     fn parse_rot_statement(&mut self) -> exception::Result<()> {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Rot)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Is)?;
-        let r = self.expression_parser().parse_expression_entrance()?.calculate();
+        let r = self.expression_parser().parse_expression_entrance()?.calculate()?;
 
         self.point_manager().set_var_rot(r);
 
@@ -121,11 +121,11 @@ impl ParserManager {
         //这里暂时只能是T。这也是为什么规定T和variable分开，如果功能拓展了就能一视同仁
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::T)?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::From)?;
-        let from = self.expression_parser().parse_expression_entrance()?.calculate();
+        let from = self.expression_parser().parse_expression_entrance()?.calculate()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::To)?;
-        let to = self.expression_parser().parse_expression_entrance()?.calculate();
+        let to = self.expression_parser().parse_expression_entrance()?.calculate()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Step)?;
-        let step = self.expression_parser().parse_expression_entrance()?.calculate();
+        let step = self.expression_parser().parse_expression_entrance()?.calculate()?;
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Draw)?;
 
         //点生成函数
@@ -140,7 +140,7 @@ impl ParserManager {
         let mut curr_t = from;
         while curr_t <= to {
             self.expression_parser().set_t(curr_t);
-            let mut coordinate = (x_expression.calculate(), y_expression.calculate());
+            let mut coordinate = (x_expression.calculate()?, y_expression.calculate()?);
             let res = self.point_manager().add_point(&mut coordinate);
             if let Err(()) = res {
                 discarded_point.push(coordinate);

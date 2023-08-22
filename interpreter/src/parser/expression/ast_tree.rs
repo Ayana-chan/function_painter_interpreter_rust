@@ -1,9 +1,10 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use crate::lexer;
+use crate::exception;
 
 pub trait ASTNode {
-    fn calculate(&self) -> f64;
+    fn calculate(&self) -> exception::Result<f64>;
     fn print_tree(&self, level: i32);
 }
 
@@ -37,7 +38,7 @@ fn print_tree_prefix_end(level: i32) {
 ///二元运算
 pub struct BinaryNode {
     token_type: lexer::TokenTypeEnum,
-    func: Rc<dyn Fn(&[f64]) -> f64>,
+    func: Rc<dyn Fn(&[f64]) -> exception::Result<f64>>,
     left: Box<dyn ASTNode>,
     right: Box<dyn ASTNode>,
 }
@@ -54,9 +55,9 @@ impl BinaryNode {
 }
 
 impl ASTNode for BinaryNode {
-    fn calculate(&self) -> f64 {
-        let left_result = self.left.calculate();
-        let right_result = self.right.calculate();
+    fn calculate(&self) -> exception::Result<f64> {
+        let left_result = self.left.calculate()?;
+        let right_result = self.right.calculate()?;
         (self.func)(&[left_result, right_result])
     }
 
@@ -89,8 +90,8 @@ impl ConstNode {
 }
 
 impl ASTNode for ConstNode {
-    fn calculate(&self) -> f64 {
-        self.value
+    fn calculate(&self) -> exception::Result<f64> {
+        Ok(self.value)
     }
 
     fn print_tree(&self, level: i32) {
@@ -105,7 +106,7 @@ impl ASTNode for ConstNode {
 pub struct FuncNode {
     token_type: lexer::TokenTypeEnum,
     func_name: String,
-    func: Rc<dyn Fn(&[f64]) -> f64>,
+    func: Rc<dyn Fn(&[f64]) -> exception::Result<f64>>,
     arg_nodes: Vec<Box<dyn ASTNode>>,
 }
 
@@ -121,10 +122,10 @@ impl FuncNode {
 }
 
 impl ASTNode for FuncNode {
-    fn calculate(&self) -> f64 {
+    fn calculate(&self) -> exception::Result<f64> {
         let mut args: Vec<f64> = Vec::new();
         for node in &self.arg_nodes {
-            args.push(node.calculate());
+            args.push(node.calculate()?);
         }
         (self.func)(&args)
     }
@@ -159,8 +160,8 @@ impl TNode {
 }
 
 impl ASTNode for TNode {
-    fn calculate(&self) -> f64 {
-        *(*self.value_reference).borrow()
+    fn calculate(&self) -> exception::Result<f64> {
+        Ok(*(*self.value_reference).borrow())
     }
 
     fn print_tree(&self, level: i32) {
@@ -187,7 +188,7 @@ impl VariableNode {
 }
 
 impl ASTNode for VariableNode {
-    fn calculate(&self) -> f64 {
+    fn calculate(&self) -> exception::Result<f64> {
         (*self.expression_reference).borrow().calculate()
     }
 
@@ -216,7 +217,7 @@ mod tests {
             .lexeme("+").func(Rc::new(|args| {
             let ans = args[0] + args[1];
             println!("binary_node {} + {} ans = {}", args[0], args[1], ans);
-            ans
+            Ok(ans)
         })).build();
 
         let const_node1 = ConstNode::new(12.5);
@@ -238,13 +239,13 @@ mod tests {
                 ans *= arg;
                 // println!("mutiall mid ans = {}", ans);
             }
-            ans
+            Ok(ans)
         })).build();
         let token2 = TokenBuilder::new().token_type(TokenTypeEnum::Plus)
             .lexeme("+").func(Rc::new(|args| {
             let ans = args[0] + args[1];
             println!("binary_node {} + {} ans = {}", args[0], args[1], ans);
-            ans
+            Ok(ans)
         })).build();
 
         let const_node1 = ConstNode::new(4.2);
@@ -260,7 +261,7 @@ mod tests {
         let func_node = FuncNode::new(&token1, args);
 
         let mut ans = func_node.calculate();
-        println!("func_node (4.2+0.8) * 5.0 * 5.0 ans = {}", ans);
+        println!("func_node (4.2+0.8) * 5.0 * 5.0 ans = {}", ans.unwrap());
         assert_eq!(ans, 125.0);
         ans = func_node.calculate();
         assert_eq!(ans, 125.0);
@@ -274,7 +275,7 @@ mod tests {
             .lexeme("+").func(Rc::new(|args| {
             let ans = args[0] + args[1];
             println!("binary_node {} + {} ans = {}", args[0], args[1], ans);
-            ans
+            Ok(ans)
         })).build();
         let token2 = TokenBuilder::new().token_type(TokenTypeEnum::Variable)
             .lexeme("val").build();
