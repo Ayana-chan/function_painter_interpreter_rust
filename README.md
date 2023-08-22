@@ -100,6 +100,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
 
 ![400](README_source/draw_test2.png)
 
+## 自动计算坐标轴范围
+
+如果在建立Drawer时不使用`.build_coordinate_range(-10.0, 20.0, -10.0, 20.0)`来指定坐标轴范围的话，就会自动计算坐标轴范围，可以刚好容纳所有绘出的点。输出图像如下图所示：
+
+![400](README_source/draw_test3.png)
+
 # 文法
 
 EBNF表示如下所示（用markdown的`代码段`标记框柱的都是正则表达式或文法符号，而非字面量）。这里不好写成纯CFG，因为使用的是LL(1)文法进行最左推导，如果要避免左递归的话加减乘除都只能是右结合了。因此，递归到加减乘除的时候变成迭代处理，以实现左结合。
