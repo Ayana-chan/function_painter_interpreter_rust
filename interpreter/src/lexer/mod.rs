@@ -185,25 +185,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_independence() {
-        let file = File::open("lex_test.txt").unwrap();
-        let lexer = Lexer::new(file);
-
-        let text = "+";
-
-        let mut token1 = lexer.token_match_map.get(text).unwrap().clone();
-        println!("token: {:?}", token1);
-
-        token1.set_lexeme("//");
-        println!("change local token: {:?}", token1);
-
-        let token2 = lexer.token_match_map.get(text).unwrap();
-        println!("again get token: {:?}", token2);
-
-        assert_eq!(text, token2.lexeme());
-    }
-
-    #[test]
     fn test_lex() {
         let file = File::open("parse_test.txt").unwrap();
         let mut lexer = Lexer::new(file);

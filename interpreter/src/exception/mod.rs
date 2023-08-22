@@ -33,6 +33,13 @@ impl ExceptionTrait for Exception {
     }
 }
 
+impl std::fmt::Debug for Exception {
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.print_exception();
+        Ok(())
+    }
+}
+
 ///编译时异常------
 struct AnalysisException {
     sub_exception: Box<dyn ExceptionTrait>,

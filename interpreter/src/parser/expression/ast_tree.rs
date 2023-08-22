@@ -199,7 +199,7 @@ impl ASTNode for VariableNode {
         println!(": {}", self.variable_name);
 
         //打印其所属语法树
-        self.expression_reference.borrow_mut().print_tree(level+1);
+        self.expression_reference.borrow_mut().print_tree(level + 1);
 
         print_tree_prefix_end(level);
     }
@@ -224,9 +224,8 @@ mod tests {
         let const_node2 = ConstNode::new(5.3);
         let binary_node = BinaryNode::new(&token1, Box::new(const_node1), Box::new(const_node2));
 
-        let ans = binary_node.calculate();
+        let ans = binary_node.calculate().unwrap();
         assert_eq!(ans, 17.8);
-
         binary_node.print_tree(0);
     }
 
@@ -260,10 +259,10 @@ mod tests {
         args.push(Box::new(const_node4));
         let func_node = FuncNode::new(&token1, args);
 
-        let mut ans = func_node.calculate();
-        println!("func_node (4.2+0.8) * 5.0 * 5.0 ans = {}", ans.unwrap());
+        let mut ans = func_node.calculate().unwrap();
+        println!("func_node (4.2+0.8) * 5.0 * 5.0 ans = {}", ans);
         assert_eq!(ans, 125.0);
-        ans = func_node.calculate();
+        ans = func_node.calculate().unwrap();
         assert_eq!(ans, 125.0);
 
         func_node.print_tree(0);
@@ -286,7 +285,7 @@ mod tests {
         let const_node = ConstNode::new(5.0);
         let binary_node = BinaryNode::new(&token1, Box::new(val_node), Box::new(const_node));
 
-        let ans = binary_node.calculate();
+        let ans = binary_node.calculate().unwrap();
         assert_eq!(ans, 13.5);
 
         binary_node.print_tree(0);
