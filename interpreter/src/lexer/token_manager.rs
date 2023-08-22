@@ -114,9 +114,9 @@ impl Token {
     }
 
     //工具函数，判断参数数量是否等同于目标
-    pub fn judge_arg_num_equal(args: &[f64], target_num: usize) -> exception::Result<f64>{
-        if args.len()!=target_num{
-            return Err(exception::ArgumentNumberNotMatchError::new(args.len(),target_num));
+    pub fn judge_arg_num_equal(func_name: &str, args: &[f64], target_num: usize) -> exception::Result<f64> {
+        if args.len() != target_num {
+            return Err(exception::ArgumentNumberNotMatchError::new(func_name, args.len(), target_num));
         }
         Ok(0.0)
     }
@@ -149,74 +149,74 @@ impl Token {
         //运算符
         string_trans_token_map.insert(String::from("+"), TokenBuilder::new().token_type(TokenTypeEnum::Plus).lexeme("+")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,2)?;
+                Token::judge_arg_num_equal("+",args, 2)?;
                 Ok(args[0] + args[1])
             })).build());
         string_trans_token_map.insert(String::from("-"), TokenBuilder::new().token_type(TokenTypeEnum::Minus).lexeme("-")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,2)?;
+                Token::judge_arg_num_equal("-",args, 2)?;
                 Ok(args[0] - args[1])
             })).build());
         string_trans_token_map.insert(String::from("*"), TokenBuilder::new().token_type(TokenTypeEnum::Mul).lexeme("*")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,2)?;
+                Token::judge_arg_num_equal("*",args, 2)?;
                 Ok(args[0] * args[1])
             })).build());//"**"前缀
         string_trans_token_map.insert(String::from("/"), TokenBuilder::new().token_type(TokenTypeEnum::Div).lexeme("/")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,2)?;
+                Token::judge_arg_num_equal("/",args, 2)?;
                 Ok(args[0] / args[1])
             })).build());//"//"前缀
         string_trans_token_map.insert(String::from("**"), TokenBuilder::new().token_type(TokenTypeEnum::Power).lexeme("**")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,2)?;
+                Token::judge_arg_num_equal("**",args, 2)?;
                 Ok(args[0].powf(args[1]))
             })).build());
 
         //函数名
         string_trans_token_map.insert(String::from("SIN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("SIN")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,1)?;
+                Token::judge_arg_num_equal("SIN",args, 1)?;
                 Ok(args[0].sin())
             })).build());
         string_trans_token_map.insert(String::from("COS"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("COS")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,1)?;
+                Token::judge_arg_num_equal("COS",args, 1)?;
                 Ok(args[0].cos())
             })).build());
         string_trans_token_map.insert(String::from("TAN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("TAN")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,1)?;
+                Token::judge_arg_num_equal("TAN",args, 1)?;
                 Ok(args[0].tan())
             })).build());
         string_trans_token_map.insert(String::from("LN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("LN")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,1)?;
+                Token::judge_arg_num_equal("LN",args, 1)?;
                 Ok(args[0].ln())
             })).build());
         string_trans_token_map.insert(String::from("EXP"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("EXP")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,1)?;
+                Token::judge_arg_num_equal("EXP",args, 1)?;
                 Ok(args[0].exp())
             })).build());
         string_trans_token_map.insert(String::from("SQRT"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("SQRT")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,1)?;
+                Token::judge_arg_num_equal("SQRT",args, 1)?;
                 Ok(args[0].sqrt())
             })).build());
         string_trans_token_map.insert(String::from("ABS"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("ABS")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,1)?;
+                Token::judge_arg_num_equal("ABS",args, 1)?;
                 Ok(args[0].abs())
             })).build());
         string_trans_token_map.insert(String::from("MAX"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("MAX")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,2)?;
+                Token::judge_arg_num_equal("MAX",args, 2)?;
                 Ok(args[0].max(args[1]))
             })).build());
         string_trans_token_map.insert(String::from("MIN"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("MIN")
             .func(Rc::new(|args| {
-                Token::judge_arg_num_equal(args,2)?;
+                Token::judge_arg_num_equal("MIN",args, 2)?;
                 Ok(args[0].min(args[1]))
             })).build());
 
