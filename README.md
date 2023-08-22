@@ -102,26 +102,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
 
 # 文法
 
-CFG上下文无关文法如下所示，但写得并不完美，使用了一些正则表达式符号（用markdown的`代码段`标记框柱的都是正则表达式或文法符号，而非字面量）。因为使用的是LL(1)文法进行最左推导，如果要避免左递归的话加减乘除都只能是右结合了。因此，递归到加减乘除的时候变成迭代处理，以实现左结合。
+EBNF表示如下所示（用markdown的`代码段`标记框柱的都是正则表达式或文法符号，而非字面量）。这里不好写成纯CFG，因为使用的是LL(1)文法进行最左推导，如果要避免左递归的话加减乘除都只能是右结合了。因此，递归到加减乘除的时候变成迭代处理，以实现左结合。
 
-1. PROGRAM `->` STATEMENT ;
-2. STATEMENT `->` ORIGIN_STATEMENT 
+1. PROGRAM = STATEMENT ;
+2. STATEMENT = ORIGIN_STATEMENT 
 `|` SCALE_STATEMENT 
 `|` ROT_STATEMENT 
 `|` FOR_STATEMENT
 `|` DEF_STATEMENT
 `|` LET_STATEMENT
-3. ORIGIN_STATEMENT `->` origin is ( EXPRESSION , EXPRESSION )
-4. SCALE_STATEMENT `->` scale is ( EXPRESSION , EXPRESSION )
-5. ROT_STATEMENT `->` rot is EXPRESSION
-6. FOR_STATEMENT `->` for $variable from EXPRESSION to EXPRESSION step EXPRESSION draw ( EXPRESSION , EXPRESSION )
-7. DEF_STATEMENT `->` def $variable = EXPRESSION
-8. LET_STATEMENT `->` let $variable = EXPRESSION
-9. EXPRESSION `->` TERM `(` `(` + `|` - `)` TERM `)*`  **//加减**
-10. TERM `->` + FACTOR `(` `(` \* `|` / `)` FACTOR `)*`  **//乘除**
-11. FACTOR `->` `(` + `|` - `)?` COMPONENT  **//正负号**
-12. COMPONENT `->` ATOM `(` \*\* COMPONENT `)?` **//乘方**
-13. ATOM `->` $id **//数字字面量**
+3. ORIGIN_STATEMENT = origin is ( EXPRESSION , EXPRESSION )
+4. SCALE_STATEMENT = scale is ( EXPRESSION , EXPRESSION )
+5. ROT_STATEMENT = rot is EXPRESSION
+6. FOR_STATEMENT = for $variable from EXPRESSION to EXPRESSION step EXPRESSION draw ( EXPRESSION , EXPRESSION )
+7. DEF_STATEMENT = def $variable = EXPRESSION
+8. LET_STATEMENT = let $variable = EXPRESSION
+9. EXPRESSION = TERM `{` `(` + `|` - `)` TERM `}`  **//加减**
+10. TERM = FACTOR `{` `(` \* `|` / `)` FACTOR `}`  **//乘除**
+11. FACTOR = `[` + `|` - `]` COMPONENT  **//正负号**
+12. COMPONENT = ATOM `[` \*\* COMPONENT `]` **//乘方**
+13. ATOM = $id **//数字字面量**
 `|` ( EXPRESSION )  **//括号**
 `|` $variable  **//变量**
 `|` $funcion ( EXPRESSION , EXPRESSION ) **//函数**
