@@ -1,4 +1,8 @@
-For T from 1 to 100 step 0.2 draw(T/10,3*ln(T));
-ROT is PI/4;
-Def quadratic = T**2-5*T-3;
-For T from -10 to 18 step 0.2 draw( T/5 , quadratic/10 );
+//For T from 1 to 100 step 0.2 draw(T/10,3*ln(T));
+//ROT is PI/4;
+//Def quadratic = T**2-5*T-3;
+//For T from -10 to 18 step 0.2 draw( T/5 , quadratic/10 );
+
+//For T from -2 to 0 step 0.02 draw( T , (1-(-T-1)**2)**0.5 );
+def a = 19.9;
+For T from 0 to 2 step 0.001 draw( T , T**(2/3)+E/3*(PI-T**2)**0.5*sin(a*PI*T) );

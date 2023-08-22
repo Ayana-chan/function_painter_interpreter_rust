@@ -32,8 +32,14 @@ impl PointManager {
         }
     }
 
-    ///添加一个点
+    ///添加一个点。如果点添加失败则返回Err(())
     pub fn add_point(&mut self, mut new_point: (f64, f64)) -> Result<(), ()> {
+        println!("Debug: before add_point: {:?}",new_point);
+        //剔除非法点
+        if new_point.0.is_nan() || new_point.1.is_nan(){
+            return Err(());
+        }
+
         //计算点位置
         new_point.0 *= self.var_scale.0;
         new_point.1 *= self.var_scale.1;

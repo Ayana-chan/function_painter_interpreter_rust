@@ -139,7 +139,6 @@ impl ParserManager {
         let mut curr_t = from;
         while curr_t <= to {
             self.expression_parser().set_t(curr_t);
-            //TODO 统计越界点，打印warning
             let _ = self.point_manager().add_point((x_expression.calculate(), y_expression.calculate()));
             curr_t += step;
         }
