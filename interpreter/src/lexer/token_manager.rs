@@ -116,7 +116,15 @@ impl Token {
     //工具函数，判断参数数量是否等同于目标
     pub fn judge_arg_num_equal(func_name: &str, args: &[f64], target_num: usize) -> exception::Result<f64> {
         if args.len() != target_num {
-            return Err(exception::ArgumentNumberNotMatchError::new(func_name, args.len(), target_num));
+            return Err(exception::ArgumentNumberNotMatchError::new(func_name, args.len(), target_num,false));
+        }
+        Ok(0.0)
+    }
+
+    //工具函数，判断参数数量是否不小于目标
+    pub fn judge_arg_num_least(func_name: &str, args: &[f64], target_num: usize) -> exception::Result<f64> {
+        if args.len() < target_num {
+            return Err(exception::ArgumentNumberNotMatchError::new(func_name, args.len(), target_num,true));
         }
         Ok(0.0)
     }
@@ -218,6 +226,16 @@ impl Token {
             .func(Rc::new(|args| {
                 Token::judge_arg_num_equal("MIN",args, 2)?;
                 Ok(args[0].min(args[1]))
+            })).build());
+        string_trans_token_map.insert(String::from("AVER"), TokenBuilder::new().token_type(TokenTypeEnum::Func).lexeme("AVER")
+            .func(Rc::new(|args| {
+                Token::judge_arg_num_least("AVER",args, 1)?;
+                let mut ans = 0.0;
+                for arg in args {
+                    ans+=arg;
+                }
+                ans/=args.len() as f64;
+                Ok(ans)
             })).build());
 
         //参数

@@ -140,14 +140,16 @@ pub struct ArgumentNumberNotMatchError {
     func_name: String,
     received_num: usize,
     target_num: usize,
+    variable_length_flag: bool
 }
 
 impl ArgumentNumberNotMatchError {
-    pub fn new(func_name: &str,received_num: usize, target_num: usize) -> Exception {
+    pub fn new(func_name: &str,received_num: usize, target_num: usize,variable_length_flag: bool) -> Exception {
         RuntimeException::generate(Box::new(Self {
             func_name: String::from(func_name),
             received_num,
             target_num,
+            variable_length_flag,
         }))
     }
 }
@@ -156,7 +158,11 @@ impl ExceptionTrait for ArgumentNumberNotMatchError {
     fn print_exception(&self) {
         println!("Arguments' Number not Match Error:");
         println!("At Function : {:?}",self.func_name);
-        println!("Expect : {:?}",self.target_num);
+        print!("Expect : {:?}",self.target_num);
+        if self.variable_length_flag{
+            print!("+")
+        }
+        println!();
         println!("Receive: {:?}",self.received_num);
     }
 }

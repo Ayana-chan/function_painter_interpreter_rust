@@ -5,14 +5,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
     let aim_file = File::open("draw_test.txt").unwrap();
     let mut interpreter_obj = interpreter::Interpreter::new(aim_file);
     //限制坐标范围
-    interpreter_obj.set_coordinate_range(-10.0, 20.0, -10.0, 20.0);
+    interpreter_obj.set_coordinate_range(-20.0, 20.0, -20.0, 20.0);
     let point_result = interpreter_obj.interpret().unwrap();
 
     let mut drawer_obj = drawer::Drawer::new()
         //指定输出图像大小
         .build_image_size(720, 720)
         //指定坐标轴显示范围
-        .build_coordinate_range(-10.0, 20.0, -10.0, 20.0)
+        .build_coordinate_range(-20.0, 20.0, -20.0, 20.0)
         //指定输出文件名和标题
         .build_message("draw_test.png", "");
 
