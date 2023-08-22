@@ -2,6 +2,7 @@ use plotters::prelude::*;
 
 pub use plotters::style::colors;
 
+#[derive(Debug)]
 pub struct Drawer {
     //结果集
     point_vec_list: Vec<(Vec<(f64, f64)>, RGBColor)>,
@@ -20,6 +21,10 @@ pub struct Drawer {
     //其他信息
     file_name: String,
     caption: Option<String>,
+
+    //其他参数
+    label_area_size: f64 ,//边缘留白大小
+    caption_size: f64 ,//标题字体大小
 }
 
 impl Drawer {
@@ -28,17 +33,19 @@ impl Drawer {
             point_vec_list: Vec::new(),
 
             defined_coordinate_range_flag: false,
-            //下面这四个数字实际上没啥用
-            min_x: -8000.0,
-            max_x: 8000.0,
-            min_y: -5000.0,
-            max_y: 5000.0,
+            min_x: -10.0,
+            max_x: 10.0,
+            min_y: -10.0,
+            max_y: 10.0,
 
             width: 640,
             height: 480,
 
             file_name: String::from("plot.png"),
             caption: None,
+
+            label_area_size: 45.0,
+            caption_size: 30.0,
         }
     }
 
@@ -88,17 +95,19 @@ impl Drawer {
             self.auto_calculate_coordinate_range();
         }
 
-        let root = BitMapBackend::new(&self.file_name, (self.width, self.height)).into_drawing_area();
+        let root = BitMapBackend::new(
+            &self.file_name, (self.width, self.height)
+        ).into_drawing_area();
         root.fill(&WHITE)?;
 
         let mut chart = ChartBuilder::on(&root);
-        chart.set_label_area_size(LabelAreaPosition::Left, 45)
-            .set_label_area_size(LabelAreaPosition::Right, 45)
-            .set_label_area_size(LabelAreaPosition::Top, 45)
-            .set_label_area_size(LabelAreaPosition::Bottom, 45);
+        chart.set_label_area_size(LabelAreaPosition::Left, self.label_area_size)
+            .set_label_area_size(LabelAreaPosition::Right, self.label_area_size)
+            .set_label_area_size(LabelAreaPosition::Top, self.label_area_size)
+            .set_label_area_size(LabelAreaPosition::Bottom, self.label_area_size);
 
         if let Some(cap) = &self.caption {
-            chart.caption(cap, ("Arial", 30).into_font());
+            chart.caption(cap, ("Arial", self.caption_size).into_font());
         }
 
         //结束构造
@@ -130,8 +139,27 @@ impl Drawer {
         Ok(())
     }
 
-    //TODO 自动生成坐标范围
-    fn auto_calculate_coordinate_range(&mut self) {}
+    ///自动生成坐标范围
+    fn auto_calculate_coordinate_range(&mut self) {
+        //遍历所有点，计算最小包络矩形
+        let mut init_flag =false; //记录是否已经通过第一个点来初始化过
+        for point_vec in &self.point_vec_list {
+            for point_tuple in &point_vec.0 {
+                if init_flag==false{
+                    init_flag=true;
+                    self.min_x=point_tuple.0;
+                    self.max_x=point_tuple.0;
+                    self.min_y=point_tuple.1;
+                    self.max_y=point_tuple.1;
+                    continue;
+                }
+                self.min_x=point_tuple.0.min(self.min_x);
+                self.max_x=point_tuple.0.max(self.max_x);
+                self.min_y=point_tuple.1.min(self.min_y);
+                self.max_y=point_tuple.1.max(self.max_y);
+            }
+        }
+    }
 }
 
 #[cfg(test)]

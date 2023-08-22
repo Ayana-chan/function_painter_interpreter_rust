@@ -34,7 +34,7 @@ impl PointManager {
 
     ///添加一个点。如果点添加失败则返回Err(())
     pub fn add_point(&mut self,  new_point: &mut (f64, f64)) -> Result<(), ()> {
-        println!("Debug: before add_point: {:?}",new_point);
+        // println!("Debug: before add_point: {:?}",new_point);
         //剔除非法点
         if new_point.0.is_nan() || new_point.1.is_nan(){
             return Err(());

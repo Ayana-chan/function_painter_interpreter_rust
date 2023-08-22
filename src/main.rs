@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
         //指定输出图像大小
         .build_image_size(720, 720)
         //指定坐标轴显示范围
-        .build_coordinate_range(-20.0, 20.0, -20.0, 20.0)
+        // .build_coordinate_range(-20.0, 20.0, -20.0, 20.0)
         //指定输出文件名和标题
         .build_message("draw_test.png", "");
 

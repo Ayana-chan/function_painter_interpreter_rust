@@ -1,6 +1,8 @@
-Let 1var = 12/T;
+//Let 1var = 12/T;
 
 //ROT is 1+2**3**4/((5+6)/7);
+ROT is 2**aver(3*T,T**2,exp(T))+1;
+
 //Def var1 = 4*T;
 //Let var1 = 12/T;
 
@@ -8,7 +10,7 @@ Let 1var = 12/T;
 //Scale is (1+2**4/(3+4/5),-(+6--7));
 //WTF is 114514;
 //Def ex1 1e e1w
-For T from 2-1 to 3**3 step 1.2 draw(2*T,exp(T));
+//For T from 2-1 to 3**3 step 1.2 draw(2*T,exp(T));
 //For T from 2+1 to 3 step 1.2 draw(2*T,exp(T));
 
 //Def hololive = (114514+1)*2 + T;
