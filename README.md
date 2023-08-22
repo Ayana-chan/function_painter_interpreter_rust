@@ -434,9 +434,11 @@ Debug: Add Point: (1919813.5, 5.5)
 
 # 异常
 
-分析中所有的异常都会以dyn Exception的形式向上传递，汇集到ParserManager的parse处进行打印。
+分析中所有的异常都会以dyn Exception的形式向上传递，汇集到ParserManager的parse处调用打印。
 
 >非保留字的、字母带头、只包含字母和数字的词都会被认为是变量，因此写错词可能也会被识别为变量。
+
+各个异常都会打印报错位置，并且都具有详尽的信息。
 
 ## 分析级异常
 
@@ -513,6 +515,8 @@ Found : Semico
 
 修正：所有包含除以0或无穷大的点都被直接丢掉而非报错。
 
+>由于表达式往往扫完一整句后才会进行计算，所以某些语义级异常的报错位置（解释停止位置）可能有些奇怪。
+
 ### 未定义变量
 
 表达式中发现未定义的变量就会报错：
@@ -540,6 +544,36 @@ Interpret Terminated at 2:11
 
 *** Runtime Error ***
 Undefined Variable Error: "VAR2"
+```
+
+### 参数数量不匹配
+
+```rust
+For T from 1 to 100 step 0.2 draw(ln(2*T,8),3);
+```
+
+```rust
+Interpret Terminated at 2:0
+
+*** Runtime Error ***
+Arguments' Number not Match Error:
+At Function : "LN"
+Expect : 1
+Receive: 2
+```
+
+```rust
+For T from 1 to 100 step 0.2 draw(max(2*T),3);
+```
+
+```rust
+Interpret Terminated at 2:0
+
+*** Runtime Error ***
+Arguments' Number not Match Error:
+At Function : "MAX"
+Expect : 2
+Receive: 1
 ```
 
 # TODO
