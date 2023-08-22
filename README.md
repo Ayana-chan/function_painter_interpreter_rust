@@ -4,6 +4,7 @@
 使用Rust，实现了函数图像绘制语言解释器。
 
 - 表达式支持四则运算、乘方、函数、括号。
+- 函数支持多参与可变参。
 - 支持行注释。
 - 使用FOR语句来绘制点以画出函数图像。
 - 支持平移（ORIGIN）、放大（SCALE）、旋转（ROT）。这三个操作只会影响后面绘制的点。
@@ -12,8 +13,8 @@
 - 高质量的异常体系（目前只有Error没有Warning），支持细节打印、定位、期望提示，具体见下文。
 - 递归下降语法分析器，简洁而高效的词法分析器，低内存消耗、带缓存的文本文件读取器。
 
->表达式支持的函数的语法分析接口实际上支持任意数量的参数。因此可以随意定义多参数的变量，不过这样的话可能每个函数调用都要返回Result以表明参数数量正确性了。
->同时，这也留下了自定义多参函数的可能性，如 `fn my_function(arg_name1,arg_name_2) => 3+T\*arg_name1+arg_name2;`，尚待实现。
+>表达式支持的函数的语法分析接口通用地支持任意数量的参数。因此可以随意定义多参、变参的函数。
+>同时，这也留下了自定义多参、变参函数的可能性，如 `fn my_function(arg_name1,arg_name_2) => 3+T\*arg_name1+arg_name2;`，尚待实现。
 
 # 简单使用
 
@@ -29,7 +30,7 @@ For后的参数必须为T。T也是程序一开始就可以直接使用的变量
 
 请留意不要出现负数的小数次方，会被丢弃。
 
-## 实例
+## 基础实例
 
 输入1：
 
@@ -85,6 +86,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
 
 ![400](README_source/draw_test.png)
 
+##
 
 # 文法
 
@@ -550,6 +552,8 @@ Undefined Variable Error: "VAR2"
 
 ### 参数数量不匹配
 
+参数多了：
+
 ```rust
 For T from 1 to 100 step 0.2 draw(ln(2*T,8),3);
 ```
@@ -564,6 +568,8 @@ Expect : 1
 Receive: 2
 ```
 
+参数少了：
+
 ```rust
 For T from 1 to 100 step 0.2 draw(max(2*T),3);
 ```
@@ -577,6 +583,23 @@ At Function : "MAX"
 Expect : 2
 Receive: 1
 ```
+
+可变参数函数的参数少了：
+
+```rust
+For T from -10 to 10 step 0.2 draw(T*2,aver());
+```
+
+```rust
+Interpret Terminated at 2:0
+
+*** Runtime Error ***
+Arguments' Number not Match Error:
+At Function : "AVER"
+Expect : 1+
+Receive: 0
+```
+
 
 # TODO
 
