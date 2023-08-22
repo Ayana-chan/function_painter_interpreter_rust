@@ -30,6 +30,8 @@ For后的参数必须为T。T也是程序一开始就可以直接使用的变量
 
 请留意不要出现负数的小数次方，会被丢弃。
 
+>支持的符号都定义在`interpreter/src/lexer/token_manager.rs`中。
+
 ## 基础实例
 
 输入1：
@@ -84,9 +86,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
 
 结果图像`draw_test.png`：
 
-![400](README_source/draw_test.png)
+![400](README_source/draw_test1.png)
 
-##
+## 函数
+
+>可以查看`interpreter/src/lexer/token_manager.rs`中的`pub fn generate_token_match_map() -> HashMap<String, Token>`函数来浏览所支持的函数及其逻辑。
+
+- 单参: sin,cos,tan,ln,exp,sqrt,abs
+- 双参: max,min
+- 变参: aver
+
+下面是`For T from -10 to 10 step 0.2 draw(T*2,aver(3*sin(T*2),T**2,-exp(T)));`画出的结果：
+
+![400](README_source/draw_test2.png)
 
 # 文法
 
