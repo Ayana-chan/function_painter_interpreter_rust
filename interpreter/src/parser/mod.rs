@@ -32,7 +32,7 @@ impl ParserManager {
         if let Err(e) = parse_result {
             println!();
             let err_position = self.get_mut_parser_kernel().lexer.get_char_position();
-            println!("Interpret Terminated at {}:{}",err_position.0,err_position.1);
+            println!("Interpret Terminated at {}:{}", err_position.0, err_position.1);
             e.print_exception();
             return Err(());
         }
@@ -64,7 +64,7 @@ impl ParserManager {
             TokenTypeEnum::Let => self.parse_let_statement()?,
             _ => return self.get_mut_parser_kernel().generate_syntax_error(&[
                 TokenTypeEnum::Origin, TokenTypeEnum::Scale, TokenTypeEnum::Rot,
-                TokenTypeEnum::For, TokenTypeEnum::Def,TokenTypeEnum::Let
+                TokenTypeEnum::For, TokenTypeEnum::Def, TokenTypeEnum::Let
             ]),
         }
         Ok(())
@@ -136,11 +136,19 @@ impl ParserManager {
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::RBracket)?;
 
         //生成所有点
+        let mut discarded_point = Vec::new(); //记录被丢弃的所有点
         let mut curr_t = from;
         while curr_t <= to {
             self.expression_parser().set_t(curr_t);
-            let _ = self.point_manager().add_point((x_expression.calculate(), y_expression.calculate()));
+            let mut coordinate = (x_expression.calculate(), y_expression.calculate());
+            let res = self.point_manager().add_point(&mut coordinate);
+            if let Err(()) = res {
+                discarded_point.push(coordinate);
+            }
             curr_t += step;
+        }
+        if !discarded_point.is_empty() {
+            println!("Warning: Discard Points: {:?}", discarded_point);
         }
 
         Ok(())
@@ -170,15 +178,16 @@ impl ParserManager {
 
         let var_name = self.get_mut_parser_kernel().get_curr_token().lexeme().clone();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Variable)?;
+        let var_ref = self.expression_parser().variable_symbol_table().get(&var_name);
+        //确保变量存在
+        if let None = var_ref {
+            return Err(exception::UndefinedVariableError::new(&var_name));
+        }
+        let var_ref = var_ref.unwrap().clone();
         self.get_mut_parser_kernel().match_and_eat_token(TokenTypeEnum::Assign)?;
 
         let ex = self.expression_parser().parse_expression_entrance()?;
-        let var_ref = self.expression_parser().variable_symbol_table().get(&var_name);
-        if let Some(var_ref) = var_ref {
-            *var_ref.borrow_mut() = ex;
-        } else {
-            return Err(exception::UndefinedVariableError::new(&var_name));
-        }
+        *var_ref.borrow_mut() = ex;
 
         Ok(())
     }
@@ -253,7 +262,7 @@ mod tests {
         let file = File::open("parse_test.txt").unwrap();
         let mut parser = ParserManager::new(file);
         let res = parser.parse();
-        println!("Res: {:?}",res);
+        println!("Res: {:?}", res);
     }
 }
 

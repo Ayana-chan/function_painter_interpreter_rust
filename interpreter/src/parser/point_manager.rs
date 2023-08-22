@@ -33,7 +33,7 @@ impl PointManager {
     }
 
     ///添加一个点。如果点添加失败则返回Err(())
-    pub fn add_point(&mut self, mut new_point: (f64, f64)) -> Result<(), ()> {
+    pub fn add_point(&mut self,  new_point: &mut (f64, f64)) -> Result<(), ()> {
         println!("Debug: before add_point: {:?}",new_point);
         //剔除非法点
         if new_point.0.is_nan() || new_point.1.is_nan(){
@@ -41,12 +41,12 @@ impl PointManager {
         }
 
         //计算点位置
-        new_point.0 *= self.var_scale.0;
-        new_point.1 *= self.var_scale.1;
+        new_point.0 *= &self.var_scale.0;
+        new_point.1 *= &self.var_scale.1;
         let temp_x = &new_point.0 * &self.var_rot_cos - &new_point.1 * &self.var_rot_sin;
         let temp_y = &new_point.0 * &self.var_rot_sin + &new_point.1 * &self.var_rot_cos;
-        new_point.0 = temp_x+self.var_origin.0;
-        new_point.1 = temp_y+self.var_origin.1;
+        new_point.0 = temp_x+&self.var_origin.0;
+        new_point.1 = temp_y+&self.var_origin.1;
 
         println!("Debug: Add Point: {:?}", new_point);
 
@@ -55,7 +55,7 @@ impl PointManager {
             //越界，无视该点
             return Err(());
         }
-        self.extract_mut_point_storage().push(new_point);
+        self.extract_mut_point_storage().push(new_point.clone());
         Ok(())
     }
 

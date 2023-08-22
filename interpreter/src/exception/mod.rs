@@ -96,26 +96,6 @@ impl ExceptionTrait for SyntaxError {
     }
 }
 
-
-///未定义变量错误
-pub struct UndefinedVariableError {
-    variable_name: String,
-}
-
-impl UndefinedVariableError {
-    pub fn new(variable_name: &str) -> Exception {
-        AnalysisException::generate(Box::new(Self {
-            variable_name: variable_name.parse().unwrap()
-        }))
-    }
-}
-
-impl ExceptionTrait for UndefinedVariableError {
-    fn print_exception(&self) {
-        println!("Undefined Variable Error: {:?}", self.variable_name);
-    }
-}
-
 ///运行时异常------
 struct RuntimeException {
     sub_exception: Box<dyn ExceptionTrait>,
@@ -135,6 +115,26 @@ impl ExceptionTrait for RuntimeException {
         self.sub_exception.print_exception();
     }
 }
+
+///未定义变量错误
+pub struct UndefinedVariableError {
+    variable_name: String,
+}
+
+impl UndefinedVariableError {
+    pub fn new(variable_name: &str) -> Exception {
+        RuntimeException::generate(Box::new(Self {
+            variable_name: variable_name.parse().unwrap()
+        }))
+    }
+}
+
+impl ExceptionTrait for UndefinedVariableError {
+    fn print_exception(&self) {
+        println!("Undefined Variable Error: {:?}", self.variable_name);
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
