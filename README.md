@@ -465,16 +465,14 @@ Debug: Add Point: (1919813.5, 5.5)
 一般是数字开头又带字母的词。
 
 ```rust
-ROT iis 2.1+42*2/4;
+Let 1var = 12/T;
 ```
 
 ```rust
-Interpret Terminated at 1:8
+Interpret Terminated at 1:9
 
 *** Analysis Error ***
-Syntax Error: Token { token_type: Variable, lexeme: "IIS" }
-Expect: [Is]
-Found : Variable
+Illegal Symbol: 1VAR
 ```
 
 ### 语法错误
