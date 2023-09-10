@@ -1,4 +1,4 @@
-use std::cell::{RefCell, RefMut};
+use std::cell::{Ref, RefCell, RefMut};
 use std::collections::HashMap;
 use std::rc::Rc;
 use crate::{exception, parser, lexer};
@@ -132,20 +132,20 @@ impl ExpressionParser {
             }
             //变量
             lexer::TokenTypeEnum::Variable => {
-                //获取参数
-                let var_name = self.get_mut_parser_kernel().get_curr_token().lexeme().clone();
+                //获取对应的语法树
+                let var_name = self.get_parser_kernel().get_curr_token().lexeme().clone();
                 let expression_reference = self.variable_symbol_table().get(&var_name);
-                if let Some(expression_reference) = expression_reference {
-                    let expression_reference = expression_reference.clone(); //防止生命周期太长导致的借用冲突
-                    let ans_node = ast_tree::VariableNode::new(
-                        self.get_mut_parser_kernel().get_curr_token().lexeme(), &expression_reference,
-                    );
-                    self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
-                    Ok(Box::new(ans_node))
-                } else {
+
+                if let None = expression_reference {
                     //变量未定义
-                    Err(exception::UndefinedVariableError::new(&var_name))
+                    return Err(exception::UndefinedVariableError::new(&var_name));
                 }
+                let expression_reference = expression_reference.unwrap().clone();
+                let ans_node = ast_tree::VariableNode::new(
+                    self.get_parser_kernel().get_curr_token().lexeme(), &expression_reference,
+                );
+                self.get_mut_parser_kernel().match_and_eat_token(token_type)?;
+                Ok(Box::new(ans_node))
             }
             //括号（子表达式）
             lexer::TokenTypeEnum::LBracket => {
@@ -197,6 +197,10 @@ impl ExpressionParser {
 
     pub fn get_mut_parser_kernel(&self) -> RefMut<parser::ParserKernel> {
         self.parser_kernel.borrow_mut()
+    }
+
+    pub fn get_parser_kernel(&self) -> Ref<parser::ParserKernel> {
+        self.parser_kernel.borrow()
     }
 
     pub fn variable_symbol_table(&mut self) -> &mut HashMap<String, Rc<RefCell<Box<dyn ASTNode>>>> {

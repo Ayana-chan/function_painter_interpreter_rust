@@ -2,7 +2,7 @@ use std::fs::File;
 
 fn main() -> Result<(), Box<dyn std::error::Error>>{
     //指定输入
-    let aim_file = File::open("draw_test.txt").unwrap();
+    let aim_file = File::open("test_file1.txt").unwrap();
     let mut interpreter_obj = interpreter::Interpreter::new(aim_file);
     //限制坐标范围
     interpreter_obj.set_coordinate_range(-20.0, 20.0, -20.0, 20.0);
